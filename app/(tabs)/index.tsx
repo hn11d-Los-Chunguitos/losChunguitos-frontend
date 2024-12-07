@@ -1,5 +1,7 @@
 import React from 'react';
 import { StyleSheet, ScrollView, Text, View } from 'react-native';
+import axios from 'axios';
+
 
 export default function HomeScreen() {
   // Submissions hardcodeades
