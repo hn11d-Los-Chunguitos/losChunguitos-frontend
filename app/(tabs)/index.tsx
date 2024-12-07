@@ -1,42 +1,38 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, ScrollView, Text, View } from 'react-native';
 import axios from 'axios';
 
-
 export default function HomeScreen() {
-  // Submissions hardcodeades
-  const submissions = [
-    {
-      id: 1,
-      title: 'Primera Submission',
-      description: 'Aquesta és la descripció de la primera submission.',
-    },
-    {
-      id: 2,
-      title: 'Segona Submission',
-      description: 'Aquí tenim més informació de la segona.',
-    },
-    {
-      id: 3,
-      title: 'Tercera Submission',
-      description: 'Aquesta és una altra submission de mostra.',
-    },
-    {
-      id: 4,
-      title: 'Quarta Submission',
-      description: 'I per últim, una altra submission.',
-    },
-  ];
+  const [submissions, setSubmissions] = useState([]); // Estado para guardar las submissions
+  const [error, setError] = useState<string | null>(null); // Estado para errores
+
+  useEffect(() => {
+    axios
+      .get('https://proyecto-asw-render.onrender.com/api/submissions')
+      .then((response) => {
+        setSubmissions(response.data); 
+      })
+      .catch((err) => {
+        setError('Error al cargar las submissions');
+        console.error(err);
+        setSubmissions([]);
+      });
+  }, []);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Submissions</Text>
-      {submissions.map((submission) => (
-        <View key={submission.id} style={styles.card}>
+      {error && <Text style={styles.error}>{error}</Text>}
+      {submissions.map((submission, index) => (
+        <View key={index} style={styles.card}>
           <View style={styles.cardHeader}>
             <Text style={styles.cardTitle}>{submission.title}</Text>
           </View>
-          <Text style={styles.cardDescription}>{submission.description}</Text>
+          <Text style={styles.cardDescription}>{submission.content}</Text>
+          <Text style={styles.cardMeta}>
+            Created by: {submission.created_by.username} on {new Date(submission.created_at).toLocaleDateString()}
+          </Text>
+          <Text style={styles.cardVotes}>Total votes: {submission.total_votes}</Text>
         </View>
       ))}
     </ScrollView>
@@ -45,7 +41,7 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    padding: 20,
     backgroundColor: '#f0f4f8',
   },
   title: {
@@ -54,6 +50,12 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: 'center',
     color: '#333',
+  },
+  error: {
+    fontSize: 16,
+    color: 'red',
+    textAlign: 'center',
+    marginBottom: 16,
   },
   card: {
     backgroundColor: '#ffffff',
@@ -71,13 +73,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 8,
   },
-  icon: {
-    width: 24,
-    height: 24,
-    backgroundColor: '#6c63ff',
-    borderRadius: 12,
-    marginRight: 12,
-  },
   cardTitle: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -87,5 +82,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
     lineHeight: 22,
+    marginBottom: 8,
+  },
+  cardMeta: {
+    fontSize: 14,
+    color: '#888',
+  },
+  cardVotes: {
+    fontSize: 14,
+    color: '#444',
+    fontWeight: 'bold',
+    marginTop: 4,
   },
 });
