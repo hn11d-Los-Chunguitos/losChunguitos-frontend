@@ -1,16 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react'; 
 import { StyleSheet, ScrollView, Text, View, TouchableOpacity, Linking } from 'react-native';
 import axios from 'axios';
+import { Link } from 'expo-router';
+import { useRouter } from 'expo-router';
 
 export default function HomeScreen() {
   const [submissions, setSubmissions] = useState([]); // Estado para guardar las submissions
   const [error, setError] = useState<string | null>(null); // Estado para errores
+
+  const router = useRouter();
 
   useEffect(() => {
     axios
       .get('https://proyecto-asw-render.onrender.com/api/submissions')
       .then((response) => {
         setSubmissions(response.data);
+        console.log('Submissions data:', response.data);
       })
       .catch((err) => {
         setError('Error al cargar las submissions');
@@ -27,6 +32,7 @@ export default function HomeScreen() {
     }
   };
 
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Submissions</Text>
@@ -41,11 +47,19 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
           <Text style={styles.cardDescription}>{submission.content}</Text>
-          <Text style={styles.cardMeta}>
-            Created by: {submission.created_by.username} on{' '}
-            {new Date(submission.created_at).toLocaleDateString()}
-          </Text>
-          <Text style={styles.cardVotes}>Total votes: {submission.total_votes}</Text>
+          <View style={styles.cardFooter}>
+            <Text style={styles.cardMeta}>
+              {submission.created_by.username} •{' '}
+              {new Date(submission.created_at).toLocaleDateString()}
+            </Text>
+            <Text style={styles.cardVotes}>{submission.total_votes} votes</Text>
+          </View>
+          <Link 
+            key={submission.id} 
+            href={`/${submission.id}?id=${submission.id}`}
+          >
+            Discuss {submission.id} 
+          </Link>
         </View>
       ))}
     </ScrollView>
@@ -54,61 +68,81 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    backgroundColor: '#f0f4f8',
+    padding: 16,
+    backgroundColor: '#f8f9fa',
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    fontSize: 26,
+    fontWeight: '600',
     marginBottom: 20,
     textAlign: 'center',
-    color: '#333',
+    color: '#212529',
   },
   error: {
     fontSize: 16,
-    color: 'red',
+    color: '#dc3545',
     textAlign: 'center',
     marginBottom: 16,
   },
   card: {
     backgroundColor: '#ffffff',
-    borderRadius: 16,
-    padding: 20,
+    borderRadius: 8,
+    padding: 16,
     marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowRadius: 4,
+    elevation: 2,
+    borderLeftWidth: 4,
+    borderLeftColor: '#007bff',
   },
   cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 12,
   },
   cardTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#444',
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#212529',
   },
   link: {
-    color: '#1e90ff', // Cambia de color si tiene un enlace
+    color: '#007bff',
     textDecorationLine: 'underline',
   },
   cardDescription: {
-    fontSize: 16,
-    color: '#666',
-    lineHeight: 22,
-    marginBottom: 8,
+    fontSize: 14,
+    color: '#495057',
+    lineHeight: 20,
+    marginBottom: 12,
+  },
+  cardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#e9ecef',
+    paddingTop: 8,
   },
   cardMeta: {
-    fontSize: 14,
-    color: '#888',
+    fontSize: 12,
+    color: '#868e96',
   },
   cardVotes: {
+    fontSize: 12,
+    color: '#495057',
+    fontWeight: '500',
+  },
+  discussButton: {
+    backgroundColor: '#007bff',
+    borderRadius: 20,
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    marginTop: 12,
+    alignSelf: 'flex-start',
+  },
+  discussButtonText: {
+    color: '#ffffff',
     fontSize: 14,
-    color: '#444',
-    fontWeight: 'bold',
-    marginTop: 4,
+    fontWeight: '500',
   },
 });
