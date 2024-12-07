@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, ScrollView, Text, View } from 'react-native';
+import { StyleSheet, ScrollView, Text, View, TouchableOpacity, Linking } from 'react-native';
 import axios from 'axios';
 
 export default function HomeScreen() {
@@ -10,7 +10,7 @@ export default function HomeScreen() {
     axios
       .get('https://proyecto-asw-render.onrender.com/api/submissions')
       .then((response) => {
-        setSubmissions(response.data); 
+        setSubmissions(response.data);
       })
       .catch((err) => {
         setError('Error al cargar las submissions');
@@ -19,6 +19,14 @@ export default function HomeScreen() {
       });
   }, []);
 
+  const handlePress = (url: string) => {
+    if (url) {
+      Linking.openURL(url).catch((err) =>
+        console.error("Failed to open URL:", err)
+      );
+    }
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Submissions</Text>
@@ -26,11 +34,16 @@ export default function HomeScreen() {
       {submissions.map((submission, index) => (
         <View key={index} style={styles.card}>
           <View style={styles.cardHeader}>
-            <Text style={styles.cardTitle}>{submission.title}</Text>
+            <TouchableOpacity onPress={() => handlePress(submission.url)}>
+              <Text style={[styles.cardTitle, submission.url && styles.link]}>
+                {submission.title}
+              </Text>
+            </TouchableOpacity>
           </View>
           <Text style={styles.cardDescription}>{submission.content}</Text>
           <Text style={styles.cardMeta}>
-            Created by: {submission.created_by.username} on {new Date(submission.created_at).toLocaleDateString()}
+            Created by: {submission.created_by.username} on{' '}
+            {new Date(submission.created_at).toLocaleDateString()}
           </Text>
           <Text style={styles.cardVotes}>Total votes: {submission.total_votes}</Text>
         </View>
@@ -77,6 +90,10 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#444',
+  },
+  link: {
+    color: '#1e90ff', // Cambia de color si tiene un enlace
+    textDecorationLine: 'underline',
   },
   cardDescription: {
     fontSize: 16,
