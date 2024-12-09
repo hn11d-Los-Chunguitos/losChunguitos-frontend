@@ -31,8 +31,22 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: 'Hacker News',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="[submission]"
+        options={{
+          title: 'Submission',
+          tabBarButton: () => null,
+        }}
+      />
+      <Tabs.Screen
+        name="newest"
+        options={{
+          title: 'Newest',
+          tabBarIcon: undefined,
         }}
       />
       
