@@ -65,55 +65,51 @@ export default function HomeScreen() {
     </ScrollView>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     padding: 16,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#f6f6ef', // Fondo general beige, como Hacker News
   },
   title: {
-    fontSize: 26,
-    fontWeight: '600',
-    marginBottom: 20,
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 16,
     textAlign: 'center',
-    color: '#212529',
+    color: '#ffffff',
+    backgroundColor: '#ff6600', // Header naranja
+    paddingVertical: 8,
   },
   error: {
     fontSize: 16,
-    color: '#dc3545',
+    color: '#ff6600', // Texto de error en naranja
     textAlign: 'center',
     marginBottom: 16,
   },
   card: {
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-    borderLeftWidth: 4,
-    borderLeftColor: '#007bff',
+    backgroundColor: '#ffffff', // Fondo blanco de las tarjetas
+    borderRadius: 4,
+    padding: 12,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#e0e0e0', // Bordes sutiles como en Hacker News
   },
   cardHeader: {
-    marginBottom: 12,
+    marginBottom: 8,
   },
   cardTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#212529',
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#000000', // Títulos en negro
+    marginBottom: 4,
   },
   link: {
-    color: '#007bff',
-    textDecorationLine: 'underline',
+    color: '#ff6600', // Links en naranja
   },
   cardDescription: {
     fontSize: 14,
-    color: '#495057',
+    color: '#666666', // Texto gris claro para contenido
     lineHeight: 20,
-    marginBottom: 12,
+    marginBottom: 8,
   },
   cardFooter: {
     flexDirection: 'row',
@@ -125,24 +121,12 @@ const styles = StyleSheet.create({
   },
   cardMeta: {
     fontSize: 12,
-    color: '#868e96',
+    color: '#828282', // Metadatos en gris claro
   },
   cardVotes: {
     fontSize: 12,
-    color: '#495057',
-    fontWeight: '500',
-  },
-  discussButton: {
-    backgroundColor: '#007bff',
-    borderRadius: 20,
-    paddingVertical: 6,
-    paddingHorizontal: 16,
-    marginTop: 12,
-    alignSelf: 'flex-start',
-  },
-  discussButtonText: {
-    color: '#ffffff',
-    fontSize: 14,
-    fontWeight: '500',
+    color: '#000000',
+    fontWeight: 'bold',
   },
 });
+
