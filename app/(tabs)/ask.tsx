@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Link } from 'expo-router';
 import { useRouter } from 'expo-router';
 
-export default function NewestScreen() {
+export default function AskScreen() {
   const [submissions, setSubmissions] = useState([]); // Estado para guardar las submissions
   const [error, setError] = useState<string | null>(null); // Estado para errores
 
@@ -12,7 +12,7 @@ export default function NewestScreen() {
 
   useEffect(() => {
     axios
-      .get('https://proyecto-asw-render.onrender.com/api/submissions/newest')
+      .get('https://proyecto-asw-render.onrender.com/api/submissions/ask')
       .then((response) => {
         setSubmissions(response.data);
         console.log('Submissions data:', response.data);
@@ -35,7 +35,7 @@ export default function NewestScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Newest</Text>
+      <Text style={styles.title}>Ask</Text>
       {error && <Text style={styles.error}>{error}</Text>}
       {submissions.map((submission, index) => (
         <View key={index} style={styles.card}>
