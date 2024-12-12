@@ -4,60 +4,44 @@ import axios from 'axios';
 import { Link } from 'expo-router';
 import { useRouter } from 'expo-router';
 
-export default function AskScreen() {
-  const [submissions, setSubmissions] = useState([]); // Estado para guardar las submissions
+export default function CommentScreen() {
+  const [comment, setComment] = useState([]); // Estado para guardar las submissions
   const [error, setError] = useState<string | null>(null); // Estado para errores
 
   const router = useRouter();
 
   useEffect(() => {
     axios
-      .get('https://proyecto-asw-render.onrender.com/api/submissions/ask')
+      .get('https://proyecto-asw-render.onrender.com/api/comments')
       .then((response) => {
-        setSubmissions(response.data);
-        console.log('Submissions data:', response.data);
+        setComment(response.data);
+        console.log('comment data:', response.data);
       })
       .catch((err) => {
-        setError('Error al cargar las submissions');
+        setError('Error al cargar las comment');
         console.error(err);
-        setSubmissions([]);
+        setComment([]);
       });
   }, []);
-
-  const handlePress = (url: string) => {
-    if (url) {
-      Linking.openURL(url).catch((err) =>
-        console.error("Failed to open URL:", err)
-      );
-    }
-  };
 
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Ask</Text>
+      <Text style={styles.title}>Comments</Text>
       {error && <Text style={styles.error}>{error}</Text>}
-      {submissions.map((submission, index) => (
+      {comment.map((comment, index) => (
         <View key={index} style={styles.card}>
-          <View style={styles.cardHeader}>
-            <TouchableOpacity onPress={() => handlePress(submission.url)}>
-              <Text style={[styles.cardTitle, submission.url && styles.link]}>
-                {submission.title}
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <Text style={styles.cardDescription}>{submission.content}</Text>
+          <Text style={styles.cardTitle}>{comment.content}</Text>
           <View style={styles.cardFooter}>
             <Text style={styles.cardMeta}>
-              {submission.created_by.username} {'at '}
-              {new Date(submission.created_at).toLocaleDateString()} {'with '}
-              {submission.total_votes} votes
+              {comment.created_by.username} {'at '}
+              {new Date(comment.created_at).toLocaleDateString()}
             </Text>
             <Text style={styles.separator}>|</Text>
             <Link 
-            style={styles.action}
-            key={submission.id} 
-            href={`/${submission.id}?id=${submission.id}`}
+            style={styles.link}
+            key={comment.id} 
+            href={`/${comment.id}?id=${comment.id}`}
           >
             Discuss
           </Link>
@@ -105,9 +89,6 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   link: {
-    color: '#ff6600',
-  },
-  action: {
     color: '#ff6600', // Links en naranja
     fontSize: 12,
   },
@@ -119,8 +100,8 @@ const styles = StyleSheet.create({
   },
   cardFooter: {
     flexDirection: 'row',
+    gap: 10,
     alignItems: 'center',
-    gap: 5,
     borderTopWidth: 1,
     borderTopColor: '#e9ecef',
     paddingTop: 8,
@@ -129,7 +110,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#828282', // Metadatos en gris claro
   },
-
+  cardVotes: {
+    fontSize: 12,
+    color: '#000000',
+    fontWeight: 'bold',
+  },
   separator: {
     marginHorizontal: 3,
     color: '#eeeeee', // Same color as cardMeta for consistency
