@@ -24,14 +24,6 @@ export default function CommentScreen() {
       });
   }, []);
 
-  const handlePress = (url: string) => {
-    if (url) {
-      Linking.openURL(url).catch((err) =>
-        console.error("Failed to open URL:", err)
-      );
-    }
-  };
-
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -39,19 +31,21 @@ export default function CommentScreen() {
       {error && <Text style={styles.error}>{error}</Text>}
       {comment.map((comment, index) => (
         <View key={index} style={styles.card}>
-          <Text style={styles.cardDescription}>{comment.content}</Text>
+          <Text style={styles.cardTitle}>{comment.content}</Text>
           <View style={styles.cardFooter}>
             <Text style={styles.cardMeta}>
-              {comment.created_by.username} •{' '}
+              {comment.created_by.username} {'at '}
               {new Date(comment.created_at).toLocaleDateString()}
             </Text>
-          </View>
-          <Link 
+            <Text style={styles.separator}>|</Text>
+            <Link 
+            style={styles.link}
             key={comment.id} 
             href={`/${comment.id}?id=${comment.id}`}
           >
-            Discuss {comment.id} 
+            Discuss
           </Link>
+          </View>
         </View>
       ))}
     </ScrollView>
@@ -96,6 +90,7 @@ const styles = StyleSheet.create({
   },
   link: {
     color: '#ff6600', // Links en naranja
+    fontSize: 12,
   },
   cardDescription: {
     fontSize: 14,
@@ -105,7 +100,7 @@ const styles = StyleSheet.create({
   },
   cardFooter: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    gap: 10,
     alignItems: 'center',
     borderTopWidth: 1,
     borderTopColor: '#e9ecef',
@@ -119,6 +114,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#000000',
     fontWeight: 'bold',
+  },
+  separator: {
+    marginHorizontal: 3,
+    color: '#eeeeee', // Same color as cardMeta for consistency
   },
 });
 

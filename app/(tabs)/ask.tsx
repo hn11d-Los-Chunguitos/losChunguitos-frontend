@@ -49,17 +49,19 @@ export default function AskScreen() {
           <Text style={styles.cardDescription}>{submission.content}</Text>
           <View style={styles.cardFooter}>
             <Text style={styles.cardMeta}>
-              {submission.created_by.username} •{' '}
-              {new Date(submission.created_at).toLocaleDateString()}
+              {submission.created_by.username} {'at '}
+              {new Date(submission.created_at).toLocaleDateString()} {'with '}
+              {submission.total_votes} votes
             </Text>
-            <Text style={styles.cardVotes}>{submission.total_votes} votes</Text>
-          </View>
-          <Link 
+            <Text style={styles.separator}>|</Text>
+            <Link 
+            style={styles.action}
             key={submission.id} 
             href={`/${submission.id}?id=${submission.id}`}
           >
-            Discuss {submission.id} 
+            Discuss
           </Link>
+          </View>
         </View>
       ))}
     </ScrollView>
@@ -103,7 +105,11 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   link: {
+    color: '#ff6600',
+  },
+  action: {
     color: '#ff6600', // Links en naranja
+    fontSize: 12,
   },
   cardDescription: {
     fontSize: 14,
@@ -113,8 +119,8 @@ const styles = StyleSheet.create({
   },
   cardFooter: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 5,
     borderTopWidth: 1,
     borderTopColor: '#e9ecef',
     paddingTop: 8,
@@ -123,10 +129,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#828282', // Metadatos en gris claro
   },
-  cardVotes: {
-    fontSize: 12,
-    color: '#000000',
-    fontWeight: 'bold',
+
+  separator: {
+    marginHorizontal: 3,
+    color: '#eeeeee', // Same color as cardMeta for consistency
   },
 });
 
