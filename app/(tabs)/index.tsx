@@ -37,6 +37,7 @@ function useFilteredSubmissions(submissions: Submission[]) {
   return { query, setQuery, filteredSubmissions, filterSubmissions };
 }
 
+const loggedInUser = { apiKey: "Tcs5cIBgIysU9IswpHxPX-R21e0faN3fGmkdp4-EOlE", username: "jose" }; // Datos del usuario logueado
 
 export default function HomeScreen() {
   const [submissions, setSubmissions] = useState<Submission[]>([]); // Estado para guardar las submissions
@@ -44,7 +45,7 @@ export default function HomeScreen() {
 
   const { query, setQuery, filteredSubmissions, filterSubmissions } = useFilteredSubmissions(submissions);
   const router = useRouter();
-
+  
   useEffect(() => {
     axios
       .get('https://proyecto-asw-render.onrender.com/api/submissions')
@@ -118,6 +119,17 @@ export default function HomeScreen() {
             >
               Discuss
             </Link>
+            {/* Botón Edit solo si el usuario es el creador */}
+            {submission.created_by.username === loggedInUser.username && (
+              <Link
+                style={styles.action} 
+                key={submission.id} 
+                href={`/editSubmission/${submission.id}?id=${submission.id}`}
+              >
+                Edit
+              </Link>
+            )}
+
           </View>
         </View>
       ))}
