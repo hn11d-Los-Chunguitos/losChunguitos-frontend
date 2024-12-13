@@ -1,13 +1,48 @@
 import React, { useEffect, useState } from 'react'; 
-import { StyleSheet, ScrollView, Text, View, TouchableOpacity, Linking } from 'react-native';
+import { StyleSheet, ScrollView, Text, View, TouchableOpacity, TextInput, Linking } from 'react-native';
 import axios from 'axios';
 import { Link } from 'expo-router';
 import { useRouter } from 'expo-router';
 
+// Hook personalizado para manejar el filtrado
+type Submission = {
+  id: number;
+  title: string;
+  content: string;
+  created_at: string;
+  created_by: { username: string };
+  total_votes: number;
+  url?: string;
+};
+
+function useFilteredSubmissions(submissions: Submission[]) {
+  const [query, setQuery] = useState('');
+  const [filteredSubmissions, setFilteredSubmissions] = useState<Submission[]>(submissions);
+
+  const filterSubmissions = () => {
+    if (!query.trim()) {
+      setFilteredSubmissions(submissions);
+    } else {
+      const lowerQuery = query.toLowerCase();
+      setFilteredSubmissions(
+        submissions.filter((submission) => submission.title.toLowerCase().includes(lowerQuery))
+      );
+    }
+  };
+
+  useEffect(() => {
+    filterSubmissions();
+  }, [submissions]);
+
+  return { query, setQuery, filteredSubmissions, filterSubmissions };
+}
+
+
 export default function HomeScreen() {
-  const [submissions, setSubmissions] = useState([]); // Estado para guardar las submissions
+  const [submissions, setSubmissions] = useState<Submission[]>([]); // Estado para guardar las submissions
   const [error, setError] = useState<string | null>(null); // Estado para errores
 
+  const { query, setQuery, filteredSubmissions, filterSubmissions } = useFilteredSubmissions(submissions);
   const router = useRouter();
 
   useEffect(() => {
@@ -32,12 +67,34 @@ export default function HomeScreen() {
     }
   };
 
+  const handleSearchSubmit = () => {
+    filterSubmissions();
+  };
+
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Submissions</Text>
       {error && <Text style={styles.error}>{error}</Text>}
-      {submissions.map((submission, index) => (
+      {/* Botón para redirigir a crear submission */}
+      <TouchableOpacity
+        style={styles.createButton}
+        onPress={() => router.push('/createSubmission')} // Ruta de la nueva pestaña
+      >
+        <Text style={styles.createButtonText}>Create New Submission</Text>
+      </TouchableOpacity>
+
+      {/* Buscador */}
+      <TextInput
+        style={styles.searchBar}
+        placeholder="Search submissions by title..."
+        placeholderTextColor="#999"
+        value={query}
+        onChangeText={setQuery}
+        onSubmitEditing={handleSearchSubmit} // Buscar al presionar Enter
+      />
+
+      {filteredSubmissions.map((submission, index) => (
         <View key={index} style={styles.card}>
           <View style={styles.cardHeader}>
             <TouchableOpacity onPress={() => handlePress(submission.url)}>
@@ -55,12 +112,12 @@ export default function HomeScreen() {
             </Text>
             <Text style={styles.separator}>|</Text>
             <Link 
-            style={styles.action}
-            key={submission.id} 
-            href={`/${submission.id}?id=${submission.id}`}
-          >
-            Discuss
-          </Link>
+              style={styles.action}
+              key={submission.id} 
+              href={`/${submission.id}?id=${submission.id}`}
+            >
+              Discuss
+            </Link>
           </View>
         </View>
       ))}
@@ -133,6 +190,31 @@ const styles = StyleSheet.create({
   separator: {
     marginHorizontal: 3,
     color: '#eeeeee', // Same color as cardMeta for consistency
+  },
+
+  searchBar: {
+    backgroundColor: '#ffffff',
+    borderColor: '#e0e0e0',
+    borderWidth: 1,
+    borderRadius: 4,
+    padding: 8,
+    marginBottom: 16,
+    fontSize: 16,
+  },
+
+  createButton: {
+    backgroundColor: '#ff6600',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    alignSelf: 'center',
+    marginBottom: 20,
+  },
+  
+  createButtonText: {
+    color: '#ffffff',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });
 
