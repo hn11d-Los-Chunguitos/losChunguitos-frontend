@@ -76,6 +76,13 @@ export default function HomeScreen() {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Submissions</Text>
       {error && <Text style={styles.error}>{error}</Text>}
+      {/* Botón para redirigir a crear submission */}
+      <TouchableOpacity
+        style={styles.createButton}
+        onPress={() => router.push('/createSubmission')} // Ruta de la nueva pestaña
+      >
+        <Text style={styles.createButtonText}>Create New Submission</Text>
+      </TouchableOpacity>
 
       {/* Buscador */}
       <TextInput
@@ -192,6 +199,21 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     padding: 8,
     marginBottom: 16,
+    fontSize: 16,
+  },
+
+  createButton: {
+    backgroundColor: '#ff6600',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    alignSelf: 'center',
+    marginBottom: 20,
+  },
+  
+  createButtonText: {
+    color: '#ffffff',
+    fontWeight: 'bold',
     fontSize: 16,
   },
 });
