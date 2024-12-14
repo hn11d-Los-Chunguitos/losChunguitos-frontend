@@ -174,6 +174,30 @@ export default function HomeScreen() {
     }
   };
 
+  const handleVoteSubmission = (submissionId: number) => {
+    if (submissionId) {
+      axios
+        .post(`https://proyecto-asw-render.onrender.com/api/submissions/${submissionId}/vote/`, {
+          "title": "string",
+          "url": "string",
+          "content": "string"
+        },
+        {
+          headers: {
+            Authorization: loggedInUser.value,
+          },
+        })
+        .then((response) => {
+          console.log('Vote was:', response.data);
+          setMessage(response.data.message); // Mostrar mensaje de éxito
+        })
+        .catch((err) => {
+          console.error('Error votting:', err);
+          setMessage('Error votting. Please try again later.'); // Mensaje de error
+        });
+    }
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Submissions</Text>
@@ -280,6 +304,14 @@ export default function HomeScreen() {
                 onPress={() => handleHide(submission.id)}
               >
                 <Text style={{ color: '#ff6600' }}>Hide</Text>
+              </TouchableOpacity>
+            )}
+            {/* Botón Vote solo si el usuario no es el creador */}
+            {submission.created_by.username !== loggedInUser.label && loggedInUser.label !== '' && (
+              <TouchableOpacity
+                onPress={() => handleVoteSubmission(submission.id)}
+              >
+                <Text style={{ color: '#ff6600' }}>Vote</Text>
               </TouchableOpacity>
             )}
           </View>
