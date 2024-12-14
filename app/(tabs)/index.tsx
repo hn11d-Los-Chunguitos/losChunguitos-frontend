@@ -38,7 +38,6 @@ function useFilteredSubmissions(submissions: Submission[]) {
   return { query, setQuery, filteredSubmissions, filterSubmissions };
 }
 
-
 const users = [
   { label: 'jose', value: 'Tcs5cIBgIysU9IswpHxPX-R21e0faN3fGmkdp4-EOlE' },
   { label: 'kat', value: 'j3RmWeSBYq1Pa1ePVkrnguoXlJFAx65dM3A-Y6Pp594' },
@@ -52,6 +51,7 @@ export default function HomeScreen() {
   const { query, setQuery, filteredSubmissions, filterSubmissions } = useFilteredSubmissions(submissions);
   const router = useRouter();
 
+  const [message, setMessage] = useState<string | null>(null); // Estado para el mensaje
   const [loggedInUser, setLoggedInUser] = useState<{ label: string, value: string }>({
     label: '',
     value: '',
@@ -91,11 +91,41 @@ export default function HomeScreen() {
     filterSubmissions();
   };
 
+  // Función para manejar la adición a favoritos
+  const handleAddToFavorites = (submissionId: number) => {
+    if (submissionId) {
+      axios
+        .post(`https://proyecto-asw-render.onrender.com/api/submissions/${submissionId}/addFav/`, {
+          "title": "string",
+          "url": "string",
+          "content": "string"
+        },
+        {
+          headers: {
+            Authorization: loggedInUser.value,
+          },
+        })
+        .then((response) => {
+          console.log('Favorite added:', response.data);
+          setMessage(response.data.message); // Mostrar mensaje de éxito
+        })
+        .catch((err) => {
+          console.error('Error adding to favorites:', err);
+          setMessage('Error adding to favorites. Please try again later.'); // Mensaje de error
+        });
+    }
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Submissions</Text>
       {error && <Text style={styles.error}>{error}</Text>}
-      
+      <Link
+                style={styles.action}
+                href={`/favoriteSubmissions?loggedInUser=${loggedInUser.value}`}
+              >
+                Submissions Favoritas
+              </Link>
       {/* Dropdown para seleccionar un usuario */}
       <div>
       <RNPickerSelect
@@ -112,6 +142,7 @@ export default function HomeScreen() {
         <p>Usuario logueado:</p>
         <p>Username: {loggedInUser.label}</p>
         <p>ApiKey: {loggedInUser.value}</p>
+        {message && <p>{message}</p>}
       </div>
     </div>
 
@@ -157,18 +188,26 @@ export default function HomeScreen() {
             >
               Discuss
             </Link>
+
             {/* Botón Edit solo si el usuario es el creador */}
             {submission.created_by.username === loggedInUser.label && (
               <Link
-              style={styles.action}
-              key={submission.id}
-              href={`/editSubmission/${submission.id}?id=${submission.id}&loggedInUser=${loggedInUser.value}`}
-            >
-              Edit
-            </Link>
-            
+                style={styles.action}
+                key={submission.id}
+                href={`/editSubmission/${submission.id}?id=${submission.id}&loggedInUser=${loggedInUser.value}`}
+              >
+                Edit
+              </Link>
             )}
 
+            {/* Botón Add to Favorites solo si el usuario no es el creador */}
+            {submission.created_by.username !== loggedInUser.label && loggedInUser.label !== '' && (
+              <TouchableOpacity
+                onPress={() => handleAddToFavorites(submission.id)}
+              >
+                <Text style={{ color: '#ff6600' }}>Add to Favorites</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       ))}
@@ -266,28 +305,6 @@ const styles = StyleSheet.create({
   createButtonText: {
     color: '#ffffff',
     fontWeight: 'bold',
-    fontSize: 16,
-  },
-});
-
-// Estilo del Dropdown
-const pickerSelectStyles = StyleSheet.create({
-  inputAndroid: {
-    marginBottom: 16,
-    padding: 10,
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderRadius: 4,
-    borderColor: '#e0e0e0',
-    fontSize: 16,
-  },
-  inputIOS: {
-    marginBottom: 16,
-    padding: 10,
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderRadius: 4,
-    borderColor: '#e0e0e0',
     fontSize: 16,
   },
 });
