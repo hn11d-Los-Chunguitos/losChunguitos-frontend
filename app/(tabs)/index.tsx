@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react'; 
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, ScrollView, Text, View, TouchableOpacity, TextInput, Linking } from 'react-native';
 import axios from 'axios';
 import { Link } from 'expo-router';
 import { useRouter } from 'expo-router';
+import RNPickerSelect from 'react-native-picker-select';
 
 // Hook personalizado para manejar el filtrado
 type Submission = {
@@ -37,7 +38,12 @@ function useFilteredSubmissions(submissions: Submission[]) {
   return { query, setQuery, filteredSubmissions, filterSubmissions };
 }
 
-const loggedInUser = { apiKey: "Tcs5cIBgIysU9IswpHxPX-R21e0faN3fGmkdp4-EOlE", username: "jose" }; // Datos del usuario logueado
+
+const users = [
+  { label: 'jose', value: 'Tcs5cIBgIysU9IswpHxPX-R21e0faN3fGmkdp4-EOlE' },
+  { label: 'kat', value: 'j3RmWeSBYq1Pa1ePVkrnguoXlJFAx65dM3A-Y6Pp594' },
+  { label: 'raul', value: 'ae-Ujr4mrChtWI3VVxbWh-XSCNcgoDk9NpGG9fABRx4' }
+];
 
 export default function HomeScreen() {
   const [submissions, setSubmissions] = useState<Submission[]>([]); // Estado para guardar las submissions
@@ -45,7 +51,20 @@ export default function HomeScreen() {
 
   const { query, setQuery, filteredSubmissions, filterSubmissions } = useFilteredSubmissions(submissions);
   const router = useRouter();
-  
+
+  const [loggedInUser, setLoggedInUser] = useState<{ label: string, value: string }>({
+    label: '',
+    value: '',
+  });
+  const [selectedUser, setSelectedUser] = useState<string>(''); // Solo almacena el value
+
+  const handleUserSelection = (value: string) => {
+    const selected = users.find(user => user.value === value);
+    if (selected) {
+      setLoggedInUser({ label: selected.label, value: selected.value }); // Asignar label y value al usuario logueado
+    }
+  };
+
   useEffect(() => {
     axios
       .get('https://proyecto-asw-render.onrender.com/api/submissions')
@@ -72,18 +91,37 @@ export default function HomeScreen() {
     filterSubmissions();
   };
 
-
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Submissions</Text>
       {error && <Text style={styles.error}>{error}</Text>}
+      
+      {/* Dropdown para seleccionar un usuario */}
+      <div>
+      <RNPickerSelect
+        onValueChange={(value) => {
+          setSelectedUser(value); // Guardamos solo el value seleccionado
+          handleUserSelection(value); // Asignamos label y value a loggedInUser
+        }}
+        items={users}
+        value={selectedUser} // Usamos el value seleccionado
+      />
+
+      {/* Mostrar el usuario logueado */}
+      <div> 
+        <p>Usuario logueado:</p>
+        <p>Username: {loggedInUser.label}</p>
+        <p>ApiKey: {loggedInUser.value}</p>
+      </div>
+    </div>
+
       {/* Botón para redirigir a crear submission */}
-      <TouchableOpacity
-        style={styles.createButton}
-        onPress={() => router.push('/createSubmission')} // Ruta de la nueva pestaña
-      >
-        <Text style={styles.createButtonText}>Create New Submission</Text>
-      </TouchableOpacity>
+      <Link 
+              style={styles.createButton}
+              href={`/createSubmission?loggedInUser=${loggedInUser.value}`}
+            >
+              <Text style={styles.createButtonText}>Create New Submission</Text>
+      </Link>
 
       {/* Buscador */}
       <TextInput
@@ -120,14 +158,15 @@ export default function HomeScreen() {
               Discuss
             </Link>
             {/* Botón Edit solo si el usuario es el creador */}
-            {submission.created_by.username === loggedInUser.username && (
+            {submission.created_by.username === loggedInUser.label && (
               <Link
-                style={styles.action} 
-                key={submission.id} 
-                href={`/editSubmission/${submission.id}?id=${submission.id}`}
-              >
-                Edit
-              </Link>
+              style={styles.action}
+              key={submission.id}
+              href={`/editSubmission/${submission.id}?id=${submission.id}&loggedInUser=${loggedInUser.value}`}
+            >
+              Edit
+            </Link>
+            
             )}
 
           </View>
@@ -136,6 +175,7 @@ export default function HomeScreen() {
     </ScrollView>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     padding: 16,
@@ -230,3 +270,24 @@ const styles = StyleSheet.create({
   },
 });
 
+// Estilo del Dropdown
+const pickerSelectStyles = StyleSheet.create({
+  inputAndroid: {
+    marginBottom: 16,
+    padding: 10,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderRadius: 4,
+    borderColor: '#e0e0e0',
+    fontSize: 16,
+  },
+  inputIOS: {
+    marginBottom: 16,
+    padding: 10,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderRadius: 4,
+    borderColor: '#e0e0e0',
+    fontSize: 16,
+  },
+});

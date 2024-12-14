@@ -4,7 +4,7 @@ import axios from 'axios';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
 export default function EditSubmissionScreen() {
-  const { id } = useLocalSearchParams() as { id: string };
+  const { id, loggedInUser } = useLocalSearchParams(); // Accede a los parámetros
   const router = useRouter();
   const [submission, setSubmission] = useState<any>(null); 
   const [title, setTitle] = useState<string>(''); 
@@ -42,7 +42,7 @@ export default function EditSubmissionScreen() {
     axios
       .put(`https://proyecto-asw-render.onrender.com/api/submissions/${id}/`, dataToSubmit, {
         headers: {
-          Authorization: `Tcs5cIBgIysU9IswpHxPX-R21e0faN3fGmkdp4-EOlE`,
+          Authorization: loggedInUser,
         },
       })
       .then((response) => {
@@ -61,7 +61,7 @@ export default function EditSubmissionScreen() {
             axios
               .delete(`https://proyecto-asw-render.onrender.com/api/submissions/${id}/`, {
                 headers: {
-                  Authorization: `Tcs5cIBgIysU9IswpHxPX-R21e0faN3fGmkdp4-EOlE`,
+                  Authorization: loggedInUser,
                 },
               })
               .then(() => {
