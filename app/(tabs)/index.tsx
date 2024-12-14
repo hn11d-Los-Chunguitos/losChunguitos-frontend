@@ -16,6 +16,8 @@ type Submission = {
   url?: string;
 };
 
+
+
 function useFilteredSubmissions(submissions: Submission[]) {
   const [query, setQuery] = useState('');
   const [filteredSubmissions, setFilteredSubmissions] = useState<Submission[]>(submissions);
@@ -46,9 +48,12 @@ const users = [
 
 export default function HomeScreen() {
   const [submissions, setSubmissions] = useState<Submission[]>([]); // Estado para guardar las submissions
+  const [visibleSubmissions, setVisibleSubmissions] = useState<Submission[]>([]);
+  const [hiddenSubmissions, setHiddenSubmissions] = useState<any[]>([]); // Estado para las submissions ocultas
+  
   const [error, setError] = useState<string | null>(null); // Estado para errores
 
-  const { query, setQuery, filteredSubmissions, filterSubmissions } = useFilteredSubmissions(submissions);
+  const { query, setQuery, filteredSubmissions, filterSubmissions } = useFilteredSubmissions(visibleSubmissions);
   const router = useRouter();
 
   const [message, setMessage] = useState<string | null>(null); // Estado para el mensaje
@@ -87,6 +92,33 @@ export default function HomeScreen() {
     }
   };
 
+  useEffect(() => {
+    if (!loggedInUser) return;
+
+    const fetchHiddenSubmissions = async () => {
+      try {
+        const response = await axios.get('https://proyecto-asw-render.onrender.com/api/hidden/', {
+          headers: {
+            Authorization: loggedInUser.value, // Usar el token del usuario
+          },
+        });
+        setHiddenSubmissions(response.data); // Guardar las submissions ocultas
+      } catch (err) {
+        console.error('Error al cargar las submissions ocultas', err);
+      }
+    };
+
+    fetchHiddenSubmissions();
+  }, [loggedInUser]);
+
+  useEffect(() => {
+    // Filtrar las submissions para mostrar solo las que no están ocultas para el usuario
+    const visibleSubmissions = submissions.filter((submission) => {
+      return !hiddenSubmissions.some((hidden) => hidden.submission.id === submission.id);
+    });
+    setVisibleSubmissions(visibleSubmissions); // Actualizar las submissions visibles
+  }, [submissions, hiddenSubmissions]);
+
   const handleSearchSubmit = () => {
     filterSubmissions();
   };
@@ -116,16 +148,51 @@ export default function HomeScreen() {
     }
   };
 
+  const handleHide = (submissionId: number) => {
+    if (submissionId) {
+      axios
+        .post(
+          'https://proyecto-asw-render.onrender.com/api/hidden/',
+          { submission_id: submissionId },
+          {
+            headers: {
+              Authorization: loggedInUser.value, // Usar el token del usuario
+            },
+          }
+        )
+        .then((response) => {
+          console.log('Submission hidden:', response.data);
+          setMessage(response.data.message); // Mostrar mensaje de éxito
+          
+          // Actualizar el estado para ocultar la submission
+          setHiddenSubmissions((prev) => [...prev, { submission: { id: submissionId } }]);
+        })
+        .catch((err) => {
+          console.error('Error hiding submission:', err);
+          setMessage('Error hiding submission. Please try again later.'); // Mensaje de error
+        });
+    }
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Submissions</Text>
       {error && <Text style={styles.error}>{error}</Text>}
+      {loggedInUser.label !== '' && (
       <Link
                 style={styles.action}
                 href={`/favoriteSubmissions?loggedInUser=${loggedInUser.value}`}
               >
                 Submissions Favoritas
-              </Link>
+              </Link>)}
+      {loggedInUser.label !== '' && (
+      <Link
+                style={styles.action}
+                href={`/hiddenSubmissions?loggedInUser=${loggedInUser.value}`}
+              >
+                Hidden Submissions
+              </Link> )}
+
       {/* Dropdown para seleccionar un usuario */}
       <div>
       <RNPickerSelect
@@ -145,7 +212,7 @@ export default function HomeScreen() {
         {message && <p>{message}</p>}
       </div>
     </div>
-
+    
       {/* Botón para redirigir a crear submission */}
       <Link 
               style={styles.createButton}
@@ -206,6 +273,13 @@ export default function HomeScreen() {
                 onPress={() => handleAddToFavorites(submission.id)}
               >
                 <Text style={{ color: '#ff6600' }}>Add to Favorites</Text>
+              </TouchableOpacity>
+            )}
+            {loggedInUser.label !== '' && (
+              <TouchableOpacity
+                onPress={() => handleHide(submission.id)}
+              >
+                <Text style={{ color: '#ff6600' }}>Hide</Text>
               </TouchableOpacity>
             )}
           </View>
