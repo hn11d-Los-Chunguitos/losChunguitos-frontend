@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, TextInput, View, TouchableOpacity, Alert } from 'react-native';
 import axios from 'axios';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 
 export default function CreateSubmission() {
+  const { loggedInUser } = useLocalSearchParams();
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
   const [content, setContent] = useState('');
@@ -55,7 +56,7 @@ export default function CreateSubmission() {
         payload,
         {
           headers: {
-            Authorization: `Tcs5cIBgIysU9IswpHxPX-R21e0faN3fGmkdp4-EOlE`,
+            Authorization: loggedInUser,
           },
         }
       );
