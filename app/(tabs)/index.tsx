@@ -275,7 +275,7 @@ export default function HomeScreen() {
             <Link 
               style={styles.action}
               key={submission.id} 
-              href={`/${submission.id}?id=${submission.id}`}
+              href={`/${submission.id}?id=${submission.id}&loggedInUser=${loggedInUser.value}`}
             >
               Discuss
             </Link>

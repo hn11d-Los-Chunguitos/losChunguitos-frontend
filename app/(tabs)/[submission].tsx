@@ -1,13 +1,40 @@
 import React, { useEffect, useState } from 'react';  
-import { StyleSheet, Text, View, ScrollView, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, ActivityIndicator, TextInput, TouchableOpacity, Alert } from 'react-native';
 import axios from 'axios';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+
+// Define clear interfaces for type safety
+interface Submission {
+  id: string;
+  title: string;
+  content: string;
+  created_by: {
+    username: string;
+  };
+  created_at: string;
+  total_votes: number;
+  comments: Comment[];
+}
+
+interface Comment {
+  id: string;
+  content: string;
+  created_by: string;
+  created_at: string;
+  replies?: Comment[];
+}
 
 export default function SubmissionDetailScreen() {
-  const { id } = useLocalSearchParams() as { id: string };
-  const [submission, setSubmission] = useState<any>(null); // Permite manejar comentarios y respuestas
+  // Type the parameters more precisely
+  const params = useLocalSearchParams();
+  const id = params.id as string;
+  const loggedInUser = params.loggedInUser as string | undefined;
+
+  const [submission, setSubmission] = useState<Submission | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [content, setContent] = useState('');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     axios
@@ -31,15 +58,14 @@ export default function SubmissionDetailScreen() {
     });
   };
 
-  // Función recursiva para renderizar comentarios y sus replies
-  const renderComments = (comments: any[], depth = 0) => {
+  // Explicitly type the comments parameter
+  const renderComments = (comments: Comment[], depth = 0) => {
     return comments.map((comment) => (
       <View key={comment.id} style={[styles.comment, { marginLeft: depth * 16 }]}>
         <Text style={styles.commentContent}>{comment.content}</Text>
         <Text style={styles.commentMeta}>
-          By User {comment.created_by} • {formatDate(comment.created_at)}
+          By User {comment.created_by.username} • {formatDate(comment.created_at)}
         </Text>
-        {/* Renderizar replies si existen */}
         {comment.replies && comment.replies.length > 0 && (
           <View style={styles.repliesContainer}>
             {renderComments(comment.replies, depth + 1)}
@@ -47,6 +73,58 @@ export default function SubmissionDetailScreen() {
         )}
       </View>
     ));
+  };
+
+  const handleSubmit = async () => {
+    if (!content.trim()) {
+      setErrorMessage('El contenido no puede estar vacío.');
+      return;
+    }
+
+    // Add a check for loggedInUser
+    if (!loggedInUser) {
+      setErrorMessage('Usuario no autenticado. Por favor, inicie sesión.');
+      return;
+    }
+
+    const payload = { 
+      submission: id,
+      parent: null,
+      content, 
+    };
+
+    try {
+        const response = await axios.post('https://proyecto-asw-render.onrender.com/api/comments/',
+            payload,
+            {
+                headers: {
+                    Authorization: loggedInUser,
+                },
+            }
+        );
+        if (response.status === 201) {
+            setContent('');
+            setErrorMessage(null);
+            Alert.alert('Éxito', 'El comentario fue enviado correctamente.');
+
+            setSubmission((prevSubmission) => {
+              if (!prevSubmission) return null;
+              return {
+                ...prevSubmission,
+                comments: [...prevSubmission.comments, response.data],
+              };
+            });
+        }
+    }
+    catch (err: any) {
+        if (err.response) {
+            const backendError = err.response.data?.message || 'Error al enviar el comentario.';
+            setErrorMessage(backendError);
+        }
+        else {
+            setErrorMessage('No se pudo conectar al servidor.');
+        }
+    }
   };
 
   if (loading) {
@@ -72,13 +150,27 @@ export default function SubmissionDetailScreen() {
           </Text>
           <Text style={styles.cardVotes}>Total votes: {submission.total_votes}</Text>
 
-          {/* Renderizar comentarios */}
           <Text style={styles.commentsTitle}>Comments:</Text>
           {submission.comments && submission.comments.length > 0 ? (
             renderComments(submission.comments)
           ) : (
             <Text style={styles.noComments}>No comments yet.</Text>
           )}
+
+          <Text style={styles.formTitle}>Agregar un Comentario:</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Escribe tu comentario aquí..."
+            value={content}
+            onChangeText={setContent}
+            multiline
+            numberOfLines={4}
+            textAlignVertical="top"
+          />
+          {errorMessage && <Text style={styles.error}>{errorMessage}</Text>}
+          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+            <Text style={styles.buttonText}>Enviar Comentario</Text>
+          </TouchableOpacity>
         </View>
       ) : (
         <Text style={styles.error}>No details available for this submission.</Text>
@@ -86,6 +178,8 @@ export default function SubmissionDetailScreen() {
     </ScrollView>
   );
 }
+
+// ... (styles remain the same as in the original file)
 
 const styles = StyleSheet.create({
   container: {
@@ -179,5 +273,33 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#828282',
     textAlign: 'center',
+  },
+  formTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#000000',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  input: {
+    backgroundColor: '#ffffff',
+    borderColor: '#e0e0e0',
+    borderWidth: 1,
+    borderRadius: 4,
+    padding: 8,
+    fontSize: 16,
+    textAlignVertical: 'top',
+    marginBottom: 16,
+  },
+  button: {
+    backgroundColor: '#ff6600',
+    padding: 12,
+    borderRadius: 4,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
