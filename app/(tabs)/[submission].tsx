@@ -24,6 +24,12 @@ interface Comment {
   replies?: Comment[];
 }
 
+interface Vote {
+  id: string;
+  comment: string;
+  user: string;
+}
+
 export default function SubmissionDetailScreen() {
   // Type the parameters more precisely
   const params = useLocalSearchParams();
@@ -60,19 +66,42 @@ export default function SubmissionDetailScreen() {
 
   // Explicitly type the comments parameter
   const renderComments = (comments: Comment[], depth = 0) => {
-    return comments.map((comment) => (
+    return comments.map((comment) =>  {
+      const username = typeof comment.created_by === 'object' 
+      ? comment.created_by.username  // Si es un objeto con propiedad username
+      : comment.created_by;           // Si es un string directo
+      console.log(comment)
+      return(
       <View key={comment.id} style={[styles.comment, { marginLeft: depth * 16 }]}>
         <Text style={styles.commentContent}>{comment.content}</Text>
         <Text style={styles.commentMeta}>
           By User {comment.created_by.username} • {formatDate(comment.created_at)}
         </Text>
+        <View style={styles.commentVoteContainer}>
+          <TouchableOpacity 
+            style={styles.voteButton} 
+            onPress={() => handleCommentVote(comment.id)}
+          >
+            <Text style={styles.voteButtonText}>👍 Votar</Text>
+          </TouchableOpacity>
+          <Text style={styles.voteCount}>
+            {comment.total_votes || 0} votos
+          </Text>
+          <TouchableOpacity 
+              style={styles.favoriteButton} 
+              onPress={() => handleCommentFavorite(comment.id)}
+            >
+              <Text style={styles.favoriteButtonText}>🤍 Favorito</Text>
+            </TouchableOpacity>
+        </View>
         {comment.replies && comment.replies.length > 0 && (
           <View style={styles.repliesContainer}>
             {renderComments(comment.replies, depth + 1)}
           </View>
         )}
       </View>
-    ));
+    );
+  });
   };
 
   const handleSubmit = async () => {
@@ -126,6 +155,84 @@ export default function SubmissionDetailScreen() {
         }
     }
   };
+
+  const handleCommentVote = async(commentId: number) => {
+    if (!loggedInUser) {
+      Alert.alert('Error', 'Debes iniciar sesión para votar');
+      return;
+    }
+    try {
+      const response = await axios.post(
+        `https://proyecto-asw-render.onrender.com/api/comments/${commentId}/vote/`,
+        { 
+          comment: commentId 
+        },
+        {
+          headers: {
+            Authorization: loggedInUser,
+          },
+        }
+      );
+
+      if (response.status === 201) {
+        setSubmission((prevSubmission) => {
+          if (!prevSubmission) return null;
+
+          // Mapear los comentarios para actualizar los votos
+          const updatedComments = prevSubmission.comments.map(comment => {
+            if (comment.id === commentId) {
+              // Asume que la respuesta contiene la información actualizada del voto
+              return {
+                ...comment,
+                total_votes: response.data.total_votes,
+                user_voted: response.data.user_voted
+              };
+            }
+            return comment;
+        });
+        return {
+          ...prevSubmission,
+          comments: updatedComments
+        };
+      });
+      Alert.alert('Éxito', 'Voto registrado correctamente');
+    }
+  } catch (err: any) {
+    console.error('Error al votar:', err);
+    
+    // Manejar diferentes tipos de errores
+    if (err.response) {
+      if (err.response.status === 400) {
+        Alert.alert('Error', 'Ya has votado este comentario');
+      } else {
+        Alert.alert('Error', 'No se pudo registrar el voto');
+      }
+    } else {
+      Alert.alert('Error', 'No se pudo conectar al servidor');
+    }
+    }
+  };
+
+  const handleCommentFavorite = async (commentId: number) => {
+    try {
+      const response = await axios.post(
+        `https://proyecto-asw-render.onrender.com/api/comments/${commentId}/addFav/`, 
+        {}, // El cuerpo vacío, si no necesitas enviar datos adicionales
+        {
+          headers: {
+            Authorization: loggedInUser, 
+          },
+        }
+      );
+      console.log('Deleted correctly:', response.data);
+    } catch (err) {
+      console.error('Error deleting comment:', err);
+      if (err.response) {
+        console.log('Server response:', err.response.data);
+      }
+    }
+  };
+
 
   if (loading) {
     return (
@@ -301,5 +408,36 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  commentVoteContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  voteButton: {
+    backgroundColor: '#f0f0f0',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 4,
+    marginRight: 10,
+  },
+  voteButtonText: {
+    color: '#000',
+    fontSize: 12,
+  },
+  voteCount: {
+    fontSize: 12,
+    color: '#828282',
+  },
+  favoriteButton: {
+    backgroundColor: '#f0f0f0',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 4,
+    marginRight: 10,
+  },
+  favoriteButtonText: {
+    color: '#000',
+    fontSize: 12,
   },
 });
