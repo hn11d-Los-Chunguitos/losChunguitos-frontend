@@ -3,10 +3,13 @@ import { StyleSheet, ScrollView, Text, View, TouchableOpacity, Linking } from 'r
 import axios from 'axios';
 import { Link } from 'expo-router';
 import { useRouter } from 'expo-router';
+import { useGlobalContext } from "@/contexts/GlobalContext";
 
 export default function HomeScreen() {
   const [submissions, setSubmissions] = useState([]); // Estado para guardar las submissions
   const [error, setError] = useState<string | null>(null); // Estado para errores
+  const { loggedUser } = useGlobalContext(); // Accede al usuario logueado
+
 
   const router = useRouter();
 
@@ -36,6 +39,8 @@ export default function HomeScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Submissions</Text>
+      <Text style={styles.title}>Welcome, {loggedUser?.username}!</Text>
+      <Text style={styles.title}>apiKey: {loggedUser?.apiKey}</Text>
       {error && <Text style={styles.error}>{error}</Text>}
       {submissions.map((submission, index) => (
         <View key={index} style={styles.card}>
