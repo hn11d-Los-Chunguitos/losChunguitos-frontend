@@ -41,9 +41,9 @@ function useFilteredSubmissions(submissions: Submission[]) {
 }
 
 const users = [
-  { label: 'jose', value: 'Tcs5cIBgIysU9IswpHxPX-R21e0faN3fGmkdp4-EOlE' },
-  { label: 'kat', value: 'j3RmWeSBYq1Pa1ePVkrnguoXlJFAx65dM3A-Y6Pp594' },
-  { label: 'raul', value: 'ae-Ujr4mrChtWI3VVxbWh-XSCNcgoDk9NpGG9fABRx4' }
+  { id_user: '1', label: 'jose', value: 'Tcs5cIBgIysU9IswpHxPX-R21e0faN3fGmkdp4-EOlE' },
+  { id_user: '2', label: 'kat', value: 'j3RmWeSBYq1Pa1ePVkrnguoXlJFAx65dM3A-Y6Pp594' },
+  { id_user: '4', label: 'raul', value: 'ae-Ujr4mrChtWI3VVxbWh-XSCNcgoDk9NpGG9fABRx4' }
 ];
 
 export default function HomeScreen() {
@@ -57,7 +57,8 @@ export default function HomeScreen() {
   const router = useRouter();
 
   const [message, setMessage] = useState<string | null>(null); // Estado para el mensaje
-  const [loggedInUser, setLoggedInUser] = useState<{ label: string, value: string }>({
+  const [loggedInUser, setLoggedInUser] = useState<{ id_user: string, label: string, value: string }>({
+    id_user: '',
     label: '',
     value: '',
   });
@@ -66,7 +67,7 @@ export default function HomeScreen() {
   const handleUserSelection = (value: string) => {
     const selected = users.find(user => user.value === value);
     if (selected) {
-      setLoggedInUser({ label: selected.label, value: selected.value }); // Asignar label y value al usuario logueado
+      setLoggedInUser({ id_user: selected.id_user, label: selected.label, value: selected.value }); // Asignar label y value al usuario logueado
     }
   };
 
@@ -275,7 +276,7 @@ export default function HomeScreen() {
             <Link 
               style={styles.action}
               key={submission.id} 
-              href={`/${submission.id}?id=${submission.id}&loggedInUser=${loggedInUser.value}`}
+              href={`/${submission.id}?id=${submission.id}&loggedInUser=${loggedInUser.value}&userId=${loggedInUser.id_user}`}
             >
               Discuss
             </Link>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, ActivityIndicator, TextInput, TouchableOpacity, Alert } from 'react-native';
 import axios from 'axios';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Link } from 'expo-router';
 
 // Define clear interfaces for type safety
 interface Submission {
@@ -35,6 +36,7 @@ export default function SubmissionDetailScreen() {
   const params = useLocalSearchParams();
   const id = params.id as string;
   const loggedInUser = params.loggedInUser as string | undefined;
+  const userId = params.userId as string | undefined;
 
   const [submission, setSubmission] = useState<Submission | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -67,15 +69,13 @@ export default function SubmissionDetailScreen() {
   // Explicitly type the comments parameter
   const renderComments = (comments: Comment[], depth = 0) => {
     return comments.map((comment) =>  {
-      const username = typeof comment.created_by === 'object' 
-      ? comment.created_by.username  // Si es un objeto con propiedad username
-      : comment.created_by;           // Si es un string directo
-      console.log(comment)
+      //location.reload();
+      const isAuthor = userId === comment.created_by.toString(); // Verifica si el usuario es el autor
       return(
       <View key={comment.id} style={[styles.comment, { marginLeft: depth * 16 }]}>
         <Text style={styles.commentContent}>{comment.content}</Text>
         <Text style={styles.commentMeta}>
-          By User {comment.created_by.username} • {formatDate(comment.created_at)}
+          By User {userId} • {formatDate(comment.created_at)}
         </Text>
         <View style={styles.commentVoteContainer}>
           <TouchableOpacity 
@@ -93,6 +93,26 @@ export default function SubmissionDetailScreen() {
             >
               <Text style={styles.favoriteButtonText}>🤍 Favorito</Text>
             </TouchableOpacity>
+            {/* Botón Edit/Delete si el usuario es el autor */}
+            {isAuthor && (
+          <View style={styles.buttonRow}>
+            <Link
+              href={`/editComment/${comment.id}?id=${comment.id}&loggedInUser=${loggedInUser}&submission=${id}&userId=${userId}`}
+              style={[styles.editButton, styles.action]} 
+            >
+              <Text style={styles.editButtonText}>✏️ Edit</Text>
+            </Link>
+
+            <TouchableOpacity
+              style={[styles.editButton]}
+              onPress={() => handleDelete(comment.id)} // Cambia aquí si necesitas función diferente
+            >
+              <Text style={styles.editButtonText}>🗑️ Delete</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+
         </View>
         {comment.replies && comment.replies.length > 0 && (
           <View style={styles.repliesContainer}>
@@ -224,14 +244,49 @@ export default function SubmissionDetailScreen() {
           },
         }
       );
-      console.log('Deleted correctly:', response.data);
+      console.log('Favorited correctly:', response.data);
     } catch (err) {
-      console.error('Error deleting comment:', err);
+      console.error('Error making favorite comment:', err);
       if (err.response) {
         console.log('Server response:', err.response.data);
       }
     }
   };
+
+  const handleDelete = async (commentId: number) => {
+    try {
+      const response = await axios.delete(
+        `https://proyecto-asw-render.onrender.com/api/comments/${commentId}/`, 
+        {
+          headers: {
+            Authorization: loggedInUser, // Token de autenticación
+          },
+        }
+      );
+  
+      if (response.status === 204) {
+        Alert.alert('Éxito', 'Comentario eliminado correctamente.');
+        
+        // Actualiza el estado local eliminando el comentario borrado
+        setSubmission((prevSubmission) => {
+          if (!prevSubmission) return null;
+          return {
+            ...prevSubmission,
+            comments: prevSubmission.comments.filter(comment => comment.id !== commentId),
+          };
+        });
+        //location.reload();
+      }
+    } catch (error) {
+      console.error('Error al eliminar el comentario:', error);
+  
+      if (error.response) {
+        Alert.alert('Error', error.response.data.message || 'No se pudo eliminar el comentario.');
+      } else {
+        Alert.alert('Error', 'Error de conexión con el servidor.');
+      }
+    }
+  }
 
 
   if (loading) {
@@ -440,4 +495,28 @@ const styles = StyleSheet.create({
     color: '#000',
     fontSize: 12,
   },
+  action: {
+    color: '#ff6600', // Links en naranja
+    fontSize: 12,
+  },
+    // Botón para Edit/Delete
+    editButton: {
+      paddingVertical: 5,
+      paddingHorizontal: 10,
+      backgroundColor: '#f0f0f0', // Fondo rojo claro
+      borderRadius: 4,
+      marginRight: 10,
+    },
+  
+    // Texto dentro del botón Edit/Delete
+    editButtonText: {
+      color: '#000', // Texto rojo oscuro
+      fontSize: 12,
+      textAlign: 'center',
+    },
+    buttonRow: {
+      flexDirection: 'row', // Organiza los botones horizontalmente
+      alignItems: 'center', // Alinea verticalmente los botones
+      marginTop: 8,
+    },
 });
