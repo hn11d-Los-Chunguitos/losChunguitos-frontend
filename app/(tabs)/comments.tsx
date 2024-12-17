@@ -51,73 +51,73 @@ export default function CommentScreen() {
     </ScrollView>
   );
 }
-const styles = StyleSheet.create({
-  container: {
-    padding: 16,
-    backgroundColor: '#f6f6ef', // Fondo general beige, como Hacker News
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
-    textAlign: 'center',
-    color: '#ffffff',
-    backgroundColor: '#ff6600', // Header naranja
-    paddingVertical: 8,
-  },
-  error: {
-    fontSize: 16,
-    color: '#ff6600', // Texto de error en naranja
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  card: {
-    backgroundColor: '#ffffff', // Fondo blanco de las tarjetas
-    borderRadius: 4,
-    padding: 12,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: '#e0e0e0', // Bordes sutiles como en Hacker News
-  },
-  cardHeader: {
-    marginBottom: 8,
-  },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#000000', // Títulos en negro
-    marginBottom: 4,
-  },
-  link: {
-    color: '#ff6600', // Links en naranja
-    fontSize: 12,
-  },
-  cardDescription: {
-    fontSize: 14,
-    color: '#666666', // Texto gris claro para contenido
-    lineHeight: 20,
-    marginBottom: 8,
-  },
-  cardFooter: {
-    flexDirection: 'row',
-    gap: 10,
-    alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: '#e9ecef',
-    paddingTop: 8,
-  },
-  cardMeta: {
-    fontSize: 12,
-    color: '#828282', // Metadatos en gris claro
-  },
-  cardVotes: {
-    fontSize: 12,
-    color: '#000000',
-    fontWeight: 'bold',
-  },
-  separator: {
-    marginHorizontal: 3,
-    color: '#eeeeee', // Same color as cardMeta for consistency
-  },
-});
+  const styles = StyleSheet.create({
+    container: {
+      padding: 16,
+      backgroundColor: '#f6f6ef', 
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      marginBottom: 16,
+      textAlign: 'center',
+      color: '#ffffff',
+      backgroundColor: '#ff6600', // Header naranja
+      paddingVertical: 8,
+    },
+    error: {
+      fontSize: 16,
+      color: '#ff6600', // Texto de error en naranja
+      textAlign: 'center',
+      marginBottom: 16,
+    },
+    card: {
+      backgroundColor: '#ffffff', // Fondo blanco de las tarjetas
+      borderRadius: 4,
+      padding: 12,
+      marginBottom: 8,
+      borderWidth: 1,
+      borderColor: '#e0e0e0', // Bordes sutiles como en Hacker News
+    },
+    cardHeader: {
+      marginBottom: 8,
+    },
+    cardTitle: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: '#000000', // Títulos en negro
+      marginBottom: 4,
+    },
+    link: {
+      color: '#ff6600', // Links en naranja
+      fontSize: 12,
+    },
+    cardDescription: {
+      fontSize: 14,
+      color: '#666666', // Texto gris claro para contenido
+      lineHeight: 20,
+      marginBottom: 8,
+    },
+    cardFooter: {
+      flexDirection: 'row',
+      gap: 10,
+      alignItems: 'center',
+      borderTopWidth: 1,
+      borderTopColor: '#e9ecef',
+      paddingTop: 8,
+    },
+    cardMeta: {
+      fontSize: 12,
+      color: '#828282', // Metadatos en gris claro
+    },
+    cardVotes: {
+      fontSize: 12,
+      color: '#000000',
+      fontWeight: 'bold',
+    },
+    separator: {
+      marginHorizontal: 3,
+      color: '#eeeeee', // Same color as cardMeta for consistency
+    },
+  });
 

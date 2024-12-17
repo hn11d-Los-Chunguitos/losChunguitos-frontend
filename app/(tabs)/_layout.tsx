@@ -36,22 +36,41 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="[submission]"
-        options={{
-          title: 'Submission',
-          tabBarButton: () => null,
-        }}
-      />
-      <Tabs.Screen
         name="newest"
         options={{
           title: 'Newest',
           tabBarIcon: undefined,
         }}
       />
-      
+      <Tabs.Screen
+        name="ask"
+        options={{
+          title: 'Ask',
+          tabBarIcon: undefined,
+        }}
 
-
+      />
+      <Tabs.Screen
+        name="comments"
+        options={{
+          title: 'Comments',
+          tabBarIcon: undefined,
+        }}
+      />
+      <Tabs.Screen
+        name="login"
+        options={{
+          title: 'account',
+        }}
+      />
+      <Tabs.Screen
+        name="[submission]"
+        options={{
+          title: 'Submission',
+          tabBarStyle: { display: 'none' },
+        }}
+        
+      />
     </Tabs>
   );
 }

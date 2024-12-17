@@ -3,6 +3,7 @@ import { StyleSheet, ScrollView, Text, View, TouchableOpacity, TextInput, Linkin
 import axios from 'axios';
 import { Link } from 'expo-router';
 import { useRouter } from 'expo-router';
+import { useGlobalContext } from "@/contexts/GlobalContext";
 import RNPickerSelect from 'react-native-picker-select';
 
 // Hook personalizado para manejar el filtrado
@@ -52,6 +53,8 @@ export default function HomeScreen() {
   const [hiddenSubmissions, setHiddenSubmissions] = useState<any[]>([]); // Estado para las submissions ocultas
   
   const [error, setError] = useState<string | null>(null); // Estado para errores
+  const { loggedUser } = useGlobalContext(); // Accede al usuario logueado
+
 
   const { query, setQuery, filteredSubmissions, filterSubmissions } = useFilteredSubmissions(visibleSubmissions);
   const router = useRouter();
@@ -202,6 +205,8 @@ export default function HomeScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Submissions</Text>
+      <Text style={styles.title}>Welcome, {loggedUser?.username}!</Text>
+      <Text style={styles.title}>apiKey: {loggedUser?.apiKey}</Text>
       {error && <Text style={styles.error}>{error}</Text>}
       {loggedInUser.label !== '' && (
       <Link
