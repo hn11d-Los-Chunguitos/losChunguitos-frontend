@@ -93,6 +93,14 @@ export default function SubmissionDetailScreen() {
             >
               <Text style={styles.favoriteButtonText}>🤍 Favorito</Text>
             </TouchableOpacity>
+            <View style={styles.buttonRow}>
+            <Link
+              href={`/replyComment/${comment.id}?id=${comment.id}&loggedInUser=${loggedInUser}&submission=${id}&userId=${userId}`}
+              style={[styles.editButton, styles.action]} 
+            >
+              <Text style={styles.editButtonText}>📜 Reply</Text>
+            </Link>
+            </View>
             {/* Botón Edit/Delete si el usuario es el autor */}
             {isAuthor && (
           <View style={styles.buttonRow}>
@@ -143,7 +151,7 @@ export default function SubmissionDetailScreen() {
     };
 
     try {
-        const response = await axios.post('https://proyecto-asw-render.onrender.com/api/comments/',
+        const response = await axios.post(`https://proyecto-asw-render.onrender.com/api/comments/`,
             payload,
             {
                 headers: {
@@ -344,6 +352,10 @@ export default function SubmissionDetailScreen() {
 // ... (styles remain the same as in the original file)
 
 const styles = StyleSheet.create({
+  page: {
+    flex: 1, // Asegura que la vista ocupe toda la pantalla
+    backgroundColor: '#ffffff', // Fondo blanco
+  },
   container: {
     flex: 1,
     padding: 16,
