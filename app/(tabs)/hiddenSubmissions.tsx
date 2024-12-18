@@ -108,7 +108,14 @@ export default function HiddenSubmissions() {
               {item.submission.total_votes} votes
             </Text>
             <Text style={styles.separator}>|</Text>
-
+            <Link 
+            style={styles.action}
+            key={item.submission.id} 
+            href={`/${item.submission.id}?id=${item.submission.id}`}
+          >
+            Discuss
+          </Link>
+          <Text style={styles.separator}>|</Text>
             <TouchableOpacity
               onPress={() => handleUnHide(item.submission.id)}
             >

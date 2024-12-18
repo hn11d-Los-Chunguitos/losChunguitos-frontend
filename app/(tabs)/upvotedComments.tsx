@@ -3,6 +3,7 @@ import { StyleSheet, ScrollView, Text, View, TouchableOpacity, Linking } from 'r
 import axios from 'axios';
 import { Link, useLocalSearchParams } from 'expo-router';
 import { useRouter } from 'expo-router';
+import { useGlobalContext } from "@/contexts/GlobalContext";
 
 export default function UpvotedComments() {
   const [comments, setComments] = useState([]); // Estado para guardar las submissions favoritas
@@ -10,6 +11,7 @@ export default function UpvotedComments() {
 
   const { loggedInUser } = useLocalSearchParams(); // Obtener loggedInUser de los parámetros
   const router = useRouter();
+  const { loggedUser } = useGlobalContext(); // Accede al usuario logueado
 
   useEffect(() => {
     if (!loggedInUser) return; // Asegúrate de que el token de autenticación esté presente
@@ -54,6 +56,14 @@ export default function UpvotedComments() {
               {new Date(comment.comment.created_at).toLocaleDateString()} {'with '}
               {comment.comment.total_votes || 0} votes
             </Text>
+            <Text style={styles.separator}>|</Text>
+            <Link 
+            style={styles.action}
+            key={comment.comment.id} 
+            href={`/replyComment/${comment.comment.id}?id=${comment.comment.id}&loggedInUser=${loggedInUser}&submission=${comment.comment.submission}&userId=${loggedUser?.id}`}
+          >
+            Reply
+          </Link>
           </View>
         </View>
       ))}

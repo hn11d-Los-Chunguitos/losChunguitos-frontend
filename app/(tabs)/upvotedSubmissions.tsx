@@ -90,6 +90,14 @@ export default function UpvotedSubmissions() {
               {new Date(submission.created_at).toLocaleDateString()} {'with '}
               {submission.total_votes} votes
             </Text>
+            <Text style={styles.separator}>|</Text>
+            <Link 
+            style={styles.action}
+            key={submission.id} 
+            href={`/${submission.id}?id=${submission.id}`}
+          >
+            Discuss
+          </Link>
           </View>
         </View>
       ))}
