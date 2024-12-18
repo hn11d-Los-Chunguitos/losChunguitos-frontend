@@ -1,8 +1,10 @@
 import React, { useState } from 'react'; 
 import axios from 'axios';
 import { useGlobalContext } from "@/contexts/GlobalContext";
-import { StyleSheet, View, Text, Button, Picker, Image, TextInput } from 'react-native';
+import { StyleSheet, View, Text, Button, Picker, Image, TextInput, TouchableOpacity } from 'react-native';
 import { Link } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
+
 
 export default function LoginScreen() {
   const [selectedUser, setSelectedUser] = useState(null);
@@ -43,22 +45,28 @@ export default function LoginScreen() {
 
   const handleEdit = async () => {
     try {
-
-      // Combina los valores originales con los nuevos del formulario
-      const payload = {
-        banner: loggedUser?.banner,   // Mantiene el banner actual
-        avatar: loggedUser?.avatar,   // Mantiene el avatar actual
-        username: loggedUser?.username, // Toma el username del formulario
-        about: formData.about,       // Toma el about del formulario
-      };
-      console.log('Payload:', payload);
-  
+      if (!formData.banner || !formData.avatar) {
+        alert("Se requieren archivos para banner y avatar.");
+        return;
+      }
+      if (!formData.username || !formData.about) {
+        alert("Los campos username y about no pueden estar vacíos.");
+        return;
+      }
+      const formDataToSend = new FormData();
+      formDataToSend.append("banner", formData.banner);
+      formDataToSend.append("avatar", formData.avatar);
+      formDataToSend.append("username", loggedUser?.username);
+      formDataToSend.append("about", formData.about);
+      console.log('Payload:', formDataToSend);
+      console.log();
       const response = await axios.patch(
         `https://proyecto-asw-render.onrender.com/api/users/${loggedUser?.id}/`,
-        payload,
+        formData,
         {
           headers: {
             Authorization: loggedUser?.apiKey, // Incluye el API key
+            "Content-Type": "multipart/form-data",
           },
         }
       );
@@ -77,6 +85,26 @@ export default function LoginScreen() {
     setFormData((prevData) => ({ ...prevData, [field]: value }));
   };
 
+  const pickImage = async (setImage) => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissionResult.granted) {
+      alert("Permission to access gallery is required!");
+      return;
+    }
+  
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+  
+    if (!result.canceled) {
+      setImage(result.assets[0].uri); // Guardar la URI de la imagen seleccionada
+    }
+  };
+
+
   return (
     <View style={styles.container}>
       {loggedUser ? (
@@ -92,6 +120,24 @@ export default function LoginScreen() {
               value={formData.about}
               onChangeText={(text) => handleChange('about', text)}
             />
+
+            <TouchableOpacity
+              style={styles.changeImageButton}
+              onPress={() => pickImage((uri) => setFormData({ ...formData, banner: uri }))}
+            >
+              <Text style={styles.changeImageButtonText}>Cambiar Banner</Text>
+            </TouchableOpacity>
+            <Image source={{ uri: formData.banner }} style={styles.banner} resizeMode="cover" />
+
+            <TouchableOpacity
+              style={styles.changeImageButton}
+              onPress={() => pickImage((uri) => setFormData({ ...formData, avatar: uri }))}
+            >
+              <Text style={styles.changeImageButtonText}>Cambiar Avatar</Text>
+            </TouchableOpacity>
+            <Image source={{ uri: formData.avatar }} style={styles.avatar} resizeMode="cover" />
+
+
             <View style={styles.buttonContainer}>
               <Button title="Guardar" onPress={handleEdit} color="#ff6600" />
               <Button title="Cancelar" onPress={() => setIsEditing(false)} color="#555555" />
@@ -234,6 +280,16 @@ const styles = StyleSheet.create({
     padding: 8,
     marginBottom: 8,
     backgroundColor: '#f9f9f9',
+  },
+  changeImageButton: {
+    backgroundColor: "transparent",
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+  },
+  changeImageButtonText: {
+    color: 'blue',
+    fontSize: 12,
   },
   
 });
