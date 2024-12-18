@@ -24,6 +24,7 @@ export default function HiddenSubmissions() {
             },
           }
         );
+        console.log(response.data)
         setSubmissions(response.data); // Guardar las submissions hidden
         console.log('Hidden submissions data:', response.data);
       } catch (err) {
@@ -106,14 +107,6 @@ export default function HiddenSubmissions() {
               {new Date(item.submission.created_at).toLocaleDateString()} {' with '}
               {item.submission.total_votes} votes
             </Text>
-            <Text style={styles.separator}>|</Text>
-            <Link 
-              style={styles.action}
-              key={item.submission.id} 
-              href={`/${item.submission.id}?id=${item.submission.id}`}
-            >
-              Discuss
-            </Link>
             <Text style={styles.separator}>|</Text>
 
             <TouchableOpacity

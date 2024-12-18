@@ -2,68 +2,52 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, ScrollView, Text, View, TouchableOpacity, Linking } from 'react-native';
 import axios from 'axios';
 import { Link, useLocalSearchParams } from 'expo-router';
-import { useRouter } from 'expo-router';
 
-export default function FavoritesSubmissions() {
-  const [submissions, setSubmissions] = useState([]); // Estado para guardar las submissions favoritas
+export default function FavoriteComments() {
+  const [comments, setComments] = useState([]); // Estado para guardar las submissions favoritas
   const [error, setError] = useState<string | null>(null); // Estado para errores
 
   const { loggedInUser } = useLocalSearchParams(); // Obtener loggedInUser de los parámetros
-  const router = useRouter();
 
   useEffect(() => {
     if (!loggedInUser) return; // Asegúrate de que el token de autenticación esté presente
 
-    const fetchFavoriteSubmissions = async () => {
+    const fetchFavoriteComments = async () => {
       try {
         const response = await axios.get(
-          'https://proyecto-asw-render.onrender.com/api/submissions/favorites/',
+          'https://proyecto-asw-render.onrender.com/api/comments/favorites/',
           {
             headers: {
               Authorization: loggedInUser, // Token de autenticación
             },
           }
         );
-        setSubmissions(response.data); // Guardar las submissions favoritas
+        console.log(response.data);
+        setComments(response.data); // Guardar las submissions favoritas
         console.log('Favorite submissions data:', response.data);
       } catch (err) {
         setError('Error al cargar las submissions favoritas');
         console.error(err);
-        setSubmissions([]);
+        setComments([]);
       }
     };
 
-    fetchFavoriteSubmissions(); // Llamada a la API
+    fetchFavoriteComments(); // Llamada a la API
 
   }, [loggedInUser]); // Solo se ejecuta cuando loggedInUser cambia
 
-  const handlePress = (url: string) => {
-    if (url) {
-      Linking.openURL(url).catch((err) =>
-        console.error("Failed to open URL:", err)
-      );
-    }
-  };
-
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Favorite Submissions</Text>
+      <Text style={styles.title}>Favorite Comments</Text>
       {error && <Text style={styles.error}>{error}</Text>}
-      {submissions.map((submission, index) => (
+      {comments.map((comment, index) => (
         <View key={index} style={styles.card}>
-          <View style={styles.cardHeader}>
-            <TouchableOpacity onPress={() => handlePress(submission.url)}>
-              <Text style={[styles.cardTitle, submission.url && styles.link]}>
-                {submission.title}
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <Text style={styles.cardDescription}>{submission.content}</Text>
+          <Text style={styles.cardTitle}>{comment.content}</Text>
           <View style={styles.cardFooter}>
             <Text style={styles.cardMeta}>
-              {submission.created_by.username} {'at '}
-              {new Date(submission.created_at).toLocaleDateString()} {'with '}
-              {submission.total_votes} votes
+              {comment.created_by?.username} {'at '}
+              {new Date(comment.created_at).toLocaleDateString()} {'with '}
+              {comment.total_votes} votes
             </Text>
           </View>
         </View>

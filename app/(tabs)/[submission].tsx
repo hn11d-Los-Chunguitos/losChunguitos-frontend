@@ -68,69 +68,76 @@ export default function SubmissionDetailScreen() {
 
   // Explicitly type the comments parameter
   const renderComments = (comments: Comment[], depth = 0) => {
-    return comments.map((comment) =>  {
-      //location.reload();
-      const isAuthor = userId === comment.created_by.toString(); // Verifica si el usuario es el autor
-      return(
-      <View key={comment.id} style={[styles.comment, { marginLeft: depth * 16 }]}>
-        <Text style={styles.commentContent}>{comment.content}</Text>
-        <Text style={styles.commentMeta}>
-          By User {comment.created_by} • {formatDate(comment.created_at)}
-        </Text>
-        <View style={styles.commentVoteContainer}>
-          <TouchableOpacity 
-            style={styles.voteButton} 
-            onPress={() => handleCommentVote(comment.id)}
-          >
-            <Text style={styles.voteButtonText}>👍 Votar</Text>
-          </TouchableOpacity>
-          <Text style={styles.voteCount}>
-            {comment.total_votes || 0} votos
+    return comments.map((comment) => {
+      const isAuthor = userId === comment.created_by.toString(); // Ajusta según la estructura de `created_by`
+      return (
+        <View key={comment.id} style={[styles.comment, { marginLeft: depth * 16 }]}>
+          {/* Contenido del comentario */}
+          <Text style={styles.commentContent}>{comment.content}</Text>
+          <Text style={styles.commentMeta}>
+            By User {comment.created_by?.username || 'Unknown'} • {formatDate(comment.created_at)}
           </Text>
-          <TouchableOpacity 
-              style={styles.favoriteButton} 
-              onPress={() => handleCommentFavorite(comment.id)}
-            >
-              <Text style={styles.favoriteButtonText}>🤍 Favorito</Text>
-            </TouchableOpacity>
-            <View style={styles.buttonRow}>
+  
+          {/* Controles para votar o marcar como favorito */}
+          {!isAuthor && (
+            <View style={styles.commentVoteContainer}>
+              <TouchableOpacity
+                style={styles.voteButton}
+                onPress={() => handleCommentVote(comment.id)}
+              >
+                <Text style={styles.voteButtonText}>👍 Votar</Text>
+              </TouchableOpacity>
+              <Text style={styles.voteCount}>{comment.total_votes || 0} votos</Text>
+              <TouchableOpacity
+                style={styles.favoriteButton}
+                onPress={() => handleCommentFavorite(comment.id)}
+              >
+                <Text style={styles.favoriteButtonText}>🤍 Favorito</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+  
+          {/* Botón para responder */}
+          <View style={styles.buttonRow}>
             <Link
               href={`/replyComment/${comment.id}?id=${comment.id}&loggedInUser=${loggedInUser}&submission=${id}&userId=${userId}`}
-              style={[styles.editButton, styles.action]} 
+              style={[styles.editButton, styles.action]}
             >
               <Text style={styles.editButtonText}>📜 Reply</Text>
             </Link>
+          </View>
+  
+          {/* Controles para editar o eliminar si es el autor */}
+          {isAuthor && (
+            <View style={styles.buttonRow}>
+              <Link
+                href={`/editComment/${comment.id}?id=${comment.id}&loggedInUser=${loggedInUser}&submission=${id}&userId=${userId}`}
+                style={[styles.editButton, styles.action]}
+              >
+                <Text style={styles.editButtonText}>✏️ Edit</Text>
+              </Link>
+  
+              <TouchableOpacity
+                style={[styles.editButton]}
+                onPress={() => handleDelete(comment.id)}
+              >
+                <Text style={styles.editButtonText}>🗑️ Delete</Text>
+              </TouchableOpacity>
             </View>
-            {/* Botón Edit/Delete si el usuario es el autor */}
-            {isAuthor && (
-          <View style={styles.buttonRow}>
-            <Link
-              href={`/editComment/${comment.id}?id=${comment.id}&loggedInUser=${loggedInUser}&submission=${id}&userId=${userId}`}
-              style={[styles.editButton, styles.action]} 
-            >
-              <Text style={styles.editButtonText}>✏️ Edit</Text>
-            </Link>
-
-            <TouchableOpacity
-              style={[styles.editButton]}
-              onPress={() => handleDelete(comment.id)} // Cambia aquí si necesitas función diferente
-            >
-              <Text style={styles.editButtonText}>🗑️ Delete</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
-
+          )}
+  
+          {/* Renderizar respuestas */}
+          {comment.replies && comment.replies.length > 0 && (
+            <View style={styles.repliesContainer}>
+              {renderComments(comment.replies, depth + 1)}
+            </View>
+          )}
         </View>
-        {comment.replies && comment.replies.length > 0 && (
-          <View style={styles.repliesContainer}>
-            {renderComments(comment.replies, depth + 1)}
-          </View>
-        )}
-      </View>
-    );
-  });
+      );
+    });
   };
+  
+  
 
   const handleSubmit = async () => {
     if (!content.trim()) {

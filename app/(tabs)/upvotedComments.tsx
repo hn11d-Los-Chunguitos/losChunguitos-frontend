@@ -4,8 +4,8 @@ import axios from 'axios';
 import { Link, useLocalSearchParams } from 'expo-router';
 import { useRouter } from 'expo-router';
 
-export default function FavoritesSubmissions() {
-  const [submissions, setSubmissions] = useState([]); // Estado para guardar las submissions favoritas
+export default function UpvotedComments() {
+  const [comments, setComments] = useState([]); // Estado para guardar las submissions favoritas
   const [error, setError] = useState<string | null>(null); // Estado para errores
 
   const { loggedInUser } = useLocalSearchParams(); // Obtener loggedInUser de los parámetros
@@ -14,62 +14,52 @@ export default function FavoritesSubmissions() {
   useEffect(() => {
     if (!loggedInUser) return; // Asegúrate de que el token de autenticación esté presente
 
-    const fetchFavoriteSubmissions = async () => {
+    const fetchUpvotedComments = async () => {
       try {
         const response = await axios.get(
-          'https://proyecto-asw-render.onrender.com/api/submissions/favorites/',
+          'https://proyecto-asw-render.onrender.com/api/comments/votes/',
           {
             headers: {
               Authorization: loggedInUser, // Token de autenticación
             },
           }
         );
-        setSubmissions(response.data); // Guardar las submissions favoritas
-        console.log('Favorite submissions data:', response.data);
+        setComments(response.data); // Guardar las submissions favoritas
+        console.log('Upvoted comments data:', response.data);
       } catch (err) {
         setError('Error al cargar las submissions favoritas');
         console.error(err);
-        setSubmissions([]);
+        setComments([]);
       }
     };
 
-    fetchFavoriteSubmissions(); // Llamada a la API
+    fetchUpvotedComments(); // Llamada a la API
 
   }, [loggedInUser]); // Solo se ejecuta cuando loggedInUser cambia
 
-  const handlePress = (url: string) => {
-    if (url) {
-      Linking.openURL(url).catch((err) =>
-        console.error("Failed to open URL:", err)
-      );
-    }
-  };
-
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Favorite Submissions</Text>
+      <Text style={styles.title}>Upvoted Comments</Text>
       {error && <Text style={styles.error}>{error}</Text>}
-      {submissions.map((submission, index) => (
+      {comments.length === 0 && !error && (
+        <Text style={styles.cardMeta}>No comments to display</Text>
+      )}
+      {comments.map((comment, index) => (
         <View key={index} style={styles.card}>
-          <View style={styles.cardHeader}>
-            <TouchableOpacity onPress={() => handlePress(submission.url)}>
-              <Text style={[styles.cardTitle, submission.url && styles.link]}>
-                {submission.title}
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <Text style={styles.cardDescription}>{submission.content}</Text>
+          {/* Asegúrate de que las propiedades existan antes de mostrarlas */}
+          <Text style={styles.cardTitle}>{comment.comment.content || 'No content available'}</Text>
           <View style={styles.cardFooter}>
             <Text style={styles.cardMeta}>
-              {submission.created_by.username} {'at '}
-              {new Date(submission.created_at).toLocaleDateString()} {'with '}
-              {submission.total_votes} votes
+              {comment.comment.created_by?.username || 'Anonymous'} {'at '}
+              {new Date(comment.comment.created_at).toLocaleDateString()} {'with '}
+              {comment.comment.total_votes || 0} votes
             </Text>
           </View>
         </View>
       ))}
     </ScrollView>
   );
+  
 }
 
 const styles = StyleSheet.create({

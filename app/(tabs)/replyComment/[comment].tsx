@@ -224,7 +224,7 @@ export default function ReplyCommentScreen() {
           <Text style={styles.replyButtonText}>Reply</Text>
         </TouchableOpacity>
       </View>
-      <Link href={`/${submissionId}?id=${submissionId}&loggedInUser=${loggedInUser}&userId=${userId}`}
+      <Link href={`/`}
       style={styles.backButton}> 
         <Text style={styles.backButtonText}> Return </Text>
       </Link>
