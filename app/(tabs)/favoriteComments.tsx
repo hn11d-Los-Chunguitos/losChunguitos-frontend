@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, ScrollView, Text, View, TouchableOpacity, Linking } from 'react-native';
 import axios from 'axios';
 import { Link, useLocalSearchParams } from 'expo-router';
+import { useGlobalContext } from "@/contexts/GlobalContext";
 
 export default function FavoriteComments() {
   const [comments, setComments] = useState([]); // Estado para guardar las submissions favoritas
   const [error, setError] = useState<string | null>(null); // Estado para errores
 
   const { loggedInUser } = useLocalSearchParams(); // Obtener loggedInUser de los parámetros
+  const { loggedUser } = useGlobalContext(); // Accede al usuario logueado
 
   useEffect(() => {
     if (!loggedInUser) return; // Asegúrate de que el token de autenticación esté presente
@@ -49,6 +51,14 @@ export default function FavoriteComments() {
               {new Date(comment.created_at).toLocaleDateString()} {'with '}
               {comment.total_votes} votes
             </Text>
+            <Text style={styles.separator}>|</Text>
+                <Link 
+                style={styles.action}
+                key={comment.id} 
+                href={`/replyComment/${comment.id}?id=${comment.id}&loggedInUser=${loggedInUser}&submission=${comment.submission}&userId=${loggedUser?.id}`}
+              >
+                Reply
+              </Link>
           </View>
         </View>
       ))}

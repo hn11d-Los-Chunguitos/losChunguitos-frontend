@@ -109,7 +109,7 @@ export default function CommentScreen() {
             <Link 
             style={styles.link}
             key={comment.id} 
-            href={`/replyComment/${comment.id}?id=${comment.id}`}
+            href={`/replyComment/${comment.id}?id=${comment.id}&loggedInUser=${loggedUser?.apiKey}&submission=${comment.submission}&userId=${loggedUser?.id}`}
           >
             Reply
           </Link>
