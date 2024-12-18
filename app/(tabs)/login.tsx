@@ -48,7 +48,7 @@ export default function LoginScreen() {
       const payload = {
         banner: loggedUser?.banner,   // Mantiene el banner actual
         avatar: loggedUser?.avatar,   // Mantiene el avatar actual
-        username: formData.username, // Toma el username del formulario
+        username: loggedUser?.username, // Toma el username del formulario
         about: formData.about,       // Toma el about del formulario
       };
       console.log('Payload:', payload);
@@ -85,16 +85,11 @@ export default function LoginScreen() {
             <>
             {/* Formulario de edición */}
             <Text style={styles.title}>Editar Perfil</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Nombre de Usuario"
-              value={loggedUser?.username}
-              onChangeText={(text) => handleChange('username', text)}
-            />
+
             <TextInput
               style={styles.input}
               placeholder="Acerca de mí"
-              value={loggedUser?.about}
+              value={formData.about}
               onChangeText={(text) => handleChange('about', text)}
             />
             <View style={styles.buttonContainer}>
