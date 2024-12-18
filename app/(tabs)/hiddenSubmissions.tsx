@@ -114,10 +114,12 @@ export default function HiddenSubmissions() {
             >
               Discuss
             </Link>
+            <Text style={styles.separator}>|</Text>
+
             <TouchableOpacity
               onPress={() => handleUnHide(item.submission.id)}
             >
-              <Text style={{ color: '#ff6600' }}>Unhide</Text>
+              <Text style={styles.action}>Unhide</Text>
             </TouchableOpacity>
           </View>
         </View>

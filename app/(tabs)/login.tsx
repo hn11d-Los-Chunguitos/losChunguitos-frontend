@@ -1,11 +1,19 @@
 import React, { useState } from 'react'; 
 import axios from 'axios';
 import { useGlobalContext } from "@/contexts/GlobalContext";
-import { StyleSheet, View, Text, Button, Picker, Image } from 'react-native';
+import { StyleSheet, View, Text, Button, Picker, Image, TextInput } from 'react-native';
+import { Link } from 'expo-router';
 
 export default function LoginScreen() {
   const [selectedUser, setSelectedUser] = useState(null);
   const { loggedUser, setUser } = useGlobalContext();
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    banner: loggedUser?.banner || '',
+    avatar: loggedUser?.avatar || '',
+    username: loggedUser?.username || '',
+    about: loggedUser?.about || '',
+  });
 
   const users = [
     { id: 1, name: 'Jose', apiKey: 'Tcs5cIBgIysU9IswpHxPX-R21e0faN3fGmkdp4-EOlE' },
@@ -33,30 +41,91 @@ export default function LoginScreen() {
     setSelectedUser(null);
   };
 
+  const handleEdit = async () => {
+    try {
+      const response = await axios.patch(
+        `https://proyecto-asw-render.onrender.com/api/users/${loggedUser?.id}/`,
+        formData,
+      { 
+        headers: {
+        Authorization: loggedUser?.apiKey,
+      }, } 
+      );
+
+      // Actualizar el contexto con los nuevos datos del usuario
+      setUser({ ...loggedUser, ...response.data });
+      setIsEditing(false); // Salir del modo de edición
+    } catch (error) {
+      console.error('Error al actualizar el perfil:', error);
+      setIsEditing(false); // Salir del modo de edición
+    }
+  };
+
+  const handleChange = (field, value) => {
+    setFormData((prevData) => ({ ...prevData, [field]: value }));
+  };
+
   return (
     <View style={styles.container}>
       {loggedUser ? (
         <View style={styles.profileCard}>
-        {/* Banner */}
-        <Image
-          source={{ uri: loggedUser.banner }}
-          style={styles.banner}
-          resizeMode="cover"
-        />
-    
-        {/* Avatar */}
-        <Image
-          source={{ uri: loggedUser.avatar }}
-          style={styles.avatar}
-          resizeMode="cover"
-        />
-    
-        {/* Información del usuario */}
-        <Text style={styles.title}>Perfil de {loggedUser.username}</Text>
-        <Text style={styles.detail}>About: {loggedUser.about}</Text>
-        <Text style={styles.detail}>Karma: {loggedUser.karma}</Text>
-    
-        <Button title="Logout" onPress={handleLogout} color="#ff6600" />
+        {isEditing ? (
+            <>
+            {/* Formulario de edición */}
+            <Text style={styles.title}>Editar Perfil</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="URL del Banner"
+              value={formData.banner}
+              onChangeText={(text) => handleChange('banner', text)}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="URL del Avatar"
+              value={formData.avatar}
+              onChangeText={(text) => handleChange('avatar', text)}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Nombre de Usuario"
+              value={formData.username}
+              onChangeText={(text) => handleChange('username', text)}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Acerca de mí"
+              value={formData.about}
+              onChangeText={(text) => handleChange('about', text)}
+            />
+            <View style={styles.buttonContainer}>
+              <Button title="Guardar" onPress={handleEdit} color="#ff6600" />
+              <Button title="Cancelar" onPress={() => setIsEditing(false)} color="#555555" />
+            </View>
+          </>
+        ) : (
+          <>
+            {/* Vista del perfil */}
+            <Image source={{ uri: loggedUser.banner }} style={styles.banner} resizeMode="cover" />
+            <Image source={{ uri: loggedUser.avatar }} style={styles.avatar} resizeMode="cover" />
+            <Text style={styles.title}>Perfil de {loggedUser.username}</Text>
+            <Text style={styles.detail}>About: {loggedUser.about}</Text>
+            <Text style={styles.detail}>Karma: {loggedUser.karma}</Text>
+            <Link 
+              style={styles.action}
+              href={`/favoriteSubmissions?loggedInUser=${loggedUser?.apiKey}`}>
+              Submissions Favoritas
+            </Link>
+            <Link 
+              style={styles.action}
+              href={`/hiddenSubmissions?loggedInUser=${loggedUser?.apiKey}`}>
+                Hidden Submissions
+              </Link>
+            <View style={styles.buttonContainer}>
+              <Button title="Editar Perfil" onPress={() => setIsEditing(true)} color="#ff6600" />
+              <Button title="Logout" onPress={handleLogout} color="#ff6600" />
+            </View>
+          </>
+        )}
       </View>
       ) : (
         <View style={styles.loginCard}>
@@ -150,6 +219,18 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderWidth: 2,
     borderColor: "#ff6600",
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    marginTop: 16,
+    paddingHorizontal: 16,
+    gap: 8,
+    justifyContent: 'flex-end',
+  },
+  action: {
+    color: '#ff6600', // Links en naranja
+    fontSize: 12,
+    marginBottom: 8,
   },
   
 });

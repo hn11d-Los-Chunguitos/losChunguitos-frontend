@@ -6,7 +6,6 @@ import { useRouter } from 'expo-router';
 import { useGlobalContext } from "@/contexts/GlobalContext";
 import RNPickerSelect from 'react-native-picker-select';
 
-// Hook personalizado para manejar el filtrado
 type Submission = {
   id: number;
   title: string;
@@ -16,8 +15,6 @@ type Submission = {
   total_votes: number;
   url?: string;
 };
-
-
 
 function useFilteredSubmissions(submissions: Submission[]) {
   const [query, setQuery] = useState('');
@@ -41,11 +38,6 @@ function useFilteredSubmissions(submissions: Submission[]) {
   return { query, setQuery, filteredSubmissions, filterSubmissions };
 }
 
-const users = [
-  { id_user: '1', label: 'jose', value: 'Tcs5cIBgIysU9IswpHxPX-R21e0faN3fGmkdp4-EOlE' },
-  { id_user: '2', label: 'kat', value: 'j3RmWeSBYq1Pa1ePVkrnguoXlJFAx65dM3A-Y6Pp594' },
-  { id_user: '4', label: 'raul', value: 'ae-Ujr4mrChtWI3VVxbWh-XSCNcgoDk9NpGG9fABRx4' }
-];
 
 export default function HomeScreen() {
   const [submissions, setSubmissions] = useState<Submission[]>([]); // Estado para guardar las submissions
@@ -60,19 +52,7 @@ export default function HomeScreen() {
   const router = useRouter();
 
   const [message, setMessage] = useState<string | null>(null); // Estado para el mensaje
-  const [loggedInUser, setLoggedInUser] = useState<{ id_user: string, label: string, value: string }>({
-    id_user: '',
-    label: '',
-    value: '',
-  });
-  const [selectedUser, setSelectedUser] = useState<string>(''); // Solo almacena el value
 
-  const handleUserSelection = (value: string) => {
-    const selected = users.find(user => user.value === value);
-    if (selected) {
-      setLoggedInUser({ id_user: selected.id_user, label: selected.label, value: selected.value }); // Asignar label y value al usuario logueado
-    }
-  };
 
   useEffect(() => {
     axios
@@ -97,13 +77,13 @@ export default function HomeScreen() {
   };
 
   useEffect(() => {
-    if (!loggedInUser) return;
+    if (!loggedUser) return;
 
     const fetchHiddenSubmissions = async () => {
       try {
         const response = await axios.get('https://proyecto-asw-render.onrender.com/api/hidden/', {
           headers: {
-            Authorization: loggedInUser.value, // Usar el token del usuario
+            Authorization: loggedUser?.apiKey, // Usar el token del usuario
           },
         });
         setHiddenSubmissions(response.data); // Guardar las submissions ocultas
@@ -113,7 +93,7 @@ export default function HomeScreen() {
     };
 
     fetchHiddenSubmissions();
-  }, [loggedInUser]);
+  }, [loggedUser]);
 
   useEffect(() => {
     // Filtrar las submissions para mostrar solo las que no están ocultas para el usuario
@@ -138,7 +118,7 @@ export default function HomeScreen() {
         },
         {
           headers: {
-            Authorization: loggedInUser.value,
+            Authorization: loggedUser?.apiKey,
           },
         })
         .then((response) => {
@@ -160,7 +140,7 @@ export default function HomeScreen() {
           { submission_id: submissionId },
           {
             headers: {
-              Authorization: loggedInUser.value, // Usar el token del usuario
+              Authorization: loggedUser?.apiKey, // Usar el token del usuario
             },
           }
         )
@@ -188,7 +168,7 @@ export default function HomeScreen() {
         },
         {
           headers: {
-            Authorization: loggedInUser.value,
+            Authorization: loggedUser?.apiKey,
           },
         })
         .then((response) => {
@@ -205,48 +185,13 @@ export default function HomeScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Submissions</Text>
-      <Text style={styles.title}>Welcome, {loggedUser?.username}!</Text>
-      <Text style={styles.title}>apiKey: {loggedUser?.apiKey}</Text>
       {error && <Text style={styles.error}>{error}</Text>}
-      {loggedInUser.label !== '' && (
-      <Link
-                style={styles.action}
-                href={`/favoriteSubmissions?loggedInUser=${loggedInUser.value}`}
-              >
-                Submissions Favoritas
-              </Link>)}
-      {loggedInUser.label !== '' && (
-      <Link
-                style={styles.action}
-                href={`/hiddenSubmissions?loggedInUser=${loggedInUser.value}`}
-              >
-                Hidden Submissions
-              </Link> )}
 
-      {/* Dropdown para seleccionar un usuario */}
-      <div>
-      <RNPickerSelect
-        onValueChange={(value) => {
-          setSelectedUser(value); // Guardamos solo el value seleccionado
-          handleUserSelection(value); // Asignamos label y value a loggedInUser
-        }}
-        items={users}
-        value={selectedUser} // Usamos el value seleccionado
-      />
-
-      {/* Mostrar el usuario logueado */}
-      <div> 
-        <p>Usuario logueado:</p>
-        <p>Username: {loggedInUser.label}</p>
-        <p>ApiKey: {loggedInUser.value}</p>
-        {message && <p>{message}</p>}
-      </div>
-    </div>
     
       {/* Botón para redirigir a crear submission */}
       <Link 
               style={styles.createButton}
-              href={`/createSubmission?loggedInUser=${loggedInUser.value}`}
+              href={`/createSubmission?loggedInUser=${loggedUser?.apiKey}`}
             >
               <Text style={styles.createButtonText}>Create New Submission</Text>
       </Link>
@@ -281,43 +226,51 @@ export default function HomeScreen() {
             <Link 
               style={styles.action}
               key={submission.id} 
-              href={`/${submission.id}?id=${submission.id}&loggedInUser=${loggedInUser.value}&userId=${loggedInUser.id_user}`}
+              href={`/${submission.id}?id=${submission.id}&loggedInUser=${loggedUser?.apiKey}&userId=${loggedUser?.id}`}
             >
               Discuss
             </Link>
 
             {/* Botón Edit solo si el usuario es el creador */}
-            {submission.created_by.username === loggedInUser.label && (
+            {submission.created_by.username === loggedUser?.username && (
               <Link
                 style={styles.action}
                 key={submission.id}
-                href={`/editSubmission/${submission.id}?id=${submission.id}&loggedInUser=${loggedInUser.value}`}
+                href={`/editSubmission/${submission.id}?id=${submission.id}&loggedInUser=${loggedUser?.apiKey}`}
               >
                 Edit
               </Link>
             )}
+             
+             <Text style={styles.separator}>|</Text>
 
             {/* Botón Add to Favorites solo si el usuario no es el creador */}
-            {submission.created_by.username !== loggedInUser.label && loggedInUser.label !== '' && (
+            {submission.created_by.username !== loggedUser?.username && loggedUser?.username !== '' && (
               <TouchableOpacity
                 onPress={() => handleAddToFavorites(submission.id)}
               >
-                <Text style={{ color: '#ff6600' }}>Add to Favorites</Text>
+                <Text style={styles.action}>Add to Favorites</Text>
               </TouchableOpacity>
             )}
-            {loggedInUser.label !== '' && (
+            
+            <Text style={styles.separator}>|</Text>
+
+            {loggedUser?.username !== '' && (
               <TouchableOpacity
                 onPress={() => handleHide(submission.id)}
               >
-                <Text style={{ color: '#ff6600' }}>Hide</Text>
+                <Text style={styles.action}>Hide</Text>
               </TouchableOpacity>
             )}
+
+            <Text style={styles.separator}>|</Text>
+
             {/* Botón Vote solo si el usuario no es el creador */}
-            {submission.created_by.username !== loggedInUser.label && loggedInUser.label !== '' && (
+            {submission.created_by.username !== loggedUser?.username && loggedUser?.username !== '' && (
               <TouchableOpacity
                 onPress={() => handleVoteSubmission(submission.id)}
               >
-                <Text style={{ color: '#ff6600' }}>Vote</Text>
+                <Text style={styles.action}>Vote</Text>
               </TouchableOpacity>
             )}
           </View>

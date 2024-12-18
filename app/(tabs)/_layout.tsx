@@ -63,14 +63,14 @@ export default function TabLayout() {
           title: 'account',
         }}
       />
-      <Tabs.Screen
-        name="[submission]"
-        options={{
-          title: 'Submission',
-          tabBarStyle: { display: 'none' },
-        }}
-        
-      />
+
+      <Tabs.Screen name="[submission]" options={{ href: null }}></Tabs.Screen>
+      <Tabs.Screen name="favoriteSubmissions" options={{ href: null }}></Tabs.Screen>
+      <Tabs.Screen name="hiddenSubmissions" options={{ href: null }}></Tabs.Screen>
+      <Tabs.Screen name="createSubmission" options={{ href: null }}></Tabs.Screen>
+      <Tabs.Screen name="replyComment/[comment]" options={{ href: null }}></Tabs.Screen>
+      <Tabs.Screen name="editComment/[comment]" options={{ href: null }}></Tabs.Screen>
+      <Tabs.Screen name="editSubmission/[submission]" options={{ href: null }}></Tabs.Screen>
     </Tabs>
   );
 }
