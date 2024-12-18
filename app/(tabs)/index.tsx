@@ -4,8 +4,7 @@ import axios from 'axios';
 import { Link } from 'expo-router';
 import { useRouter } from 'expo-router';
 import { useGlobalContext } from "@/contexts/GlobalContext";
-import RNPickerSelect from 'react-native-picker-select';
-
+import { useFocusEffect } from '@react-navigation/native';
 type Submission = {
   id: number;
   title: string;
@@ -53,6 +52,19 @@ export default function HomeScreen() {
 
   const [message, setMessage] = useState<string | null>(null); // Estado para el mensaje
 
+  const fetchSubmissions = () => {
+    axios
+      .get('https://proyecto-asw-render.onrender.com/api/submissions')
+      .then((response) => {
+        setSubmissions(response.data);
+        console.log('Submissions data:', response.data);
+      })
+      .catch((err) => {
+        setError('Error al cargar las submissions');
+        console.error(err);
+        setSubmissions([]);
+      });
+  };
 
   useEffect(() => {
     axios
@@ -94,6 +106,22 @@ export default function HomeScreen() {
 
     fetchHiddenSubmissions();
   }, [loggedUser]);
+
+  const fetchHiddenSubmissions = async () => {
+    if (!loggedUser) return;
+    try {
+      const response = await axios.get('https://proyecto-asw-render.onrender.com/api/hidden/', {
+        headers: {
+          Authorization: loggedUser?.apiKey,
+        },
+      });
+      setHiddenSubmissions(response.data);
+    } catch (err) {
+      console.error('Error al cargar las submissions ocultas', err);
+    }
+  };
+
+ 
 
   useEffect(() => {
     // Filtrar las submissions para mostrar solo las que no están ocultas para el usuario
@@ -174,6 +202,10 @@ export default function HomeScreen() {
         .then((response) => {
           console.log('Vote was:', response.data);
           setMessage(response.data.message); // Mostrar mensaje de éxito
+          fetchSubmissions();
+          fetchHiddenSubmissions();
+
+
         })
         .catch((err) => {
           console.error('Error votting:', err);
@@ -182,6 +214,13 @@ export default function HomeScreen() {
     }
   };
 
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchSubmissions();
+      fetchHiddenSubmissions();
+    }, [loggedUser]) // Dependencia
+  );
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Submissions</Text>
@@ -189,13 +228,16 @@ export default function HomeScreen() {
 
     
       {/* Botón para redirigir a crear submission */}
+      {loggedUser !== null && (
       <Link 
               style={styles.createButton}
               href={`/createSubmission?loggedInUser=${loggedUser?.apiKey}`}
             >
               <Text style={styles.createButtonText}>Create New Submission</Text>
       </Link>
+      )}
 
+      {message && <Text style={styles.error}>{message}</Text>}
       {/* Buscador */}
       <TextInput
         style={styles.searchBar}
@@ -250,7 +292,7 @@ export default function HomeScreen() {
              
 
             {/* Botón Add to Favorites solo si el usuario no es el creador */}
-            {submission.created_by.username !== loggedUser?.username && loggedUser?.username !== '' && (
+            {submission.created_by.username !== loggedUser?.username && loggedUser !== null && (
                 <><Text style={styles.separator}>|</Text><TouchableOpacity
                 onPress={() => handleAddToFavorites(submission.id)}
               >
@@ -258,25 +300,22 @@ export default function HomeScreen() {
               </TouchableOpacity></>
             )}
             
-            <Text style={styles.separator}>|</Text>
 
-            {loggedUser?.username !== '' && (
-              <TouchableOpacity
+            {loggedUser !== null && (
+                <><Text style={styles.separator}>|</Text><><TouchableOpacity
                 onPress={() => handleHide(submission.id)}
               >
                 <Text style={styles.action}>Hide</Text>
-              </TouchableOpacity>
+              </TouchableOpacity></></>
             )}
 
-            <Text style={styles.separator}>|</Text>
-
             {/* Botón Vote solo si el usuario no es el creador */}
-            {submission.created_by.username !== loggedUser?.username && loggedUser?.username !== '' && (
-              <TouchableOpacity
+            {submission.created_by.username !== loggedUser?.username && loggedUser !== null && (
+                          <><Text style={styles.separator}>|</Text><TouchableOpacity
                 onPress={() => handleVoteSubmission(submission.id)}
               >
                 <Text style={styles.action}>Vote</Text>
-              </TouchableOpacity>
+              </TouchableOpacity></>
             )}
           </View>
         </View>
