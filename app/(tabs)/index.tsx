@@ -217,8 +217,14 @@ export default function HomeScreen() {
           </View>
           <Text style={styles.cardDescription}>{submission.content}</Text>
           <View style={styles.cardFooter}>
+          <Link 
+            style={styles.action}
+            key={submission.created_by.id} 
+            href={`/users/${submission.created_by.id}?id=${submission.created_by.id}`}
+          > {submission.created_by.username} </Link>
+
             <Text style={styles.cardMeta}>
-              {submission.created_by.username} {'at '}
+              {'at '}
               {new Date(submission.created_at).toLocaleDateString()} {'with '}
               {submission.total_votes} votes
             </Text>
@@ -233,24 +239,23 @@ export default function HomeScreen() {
 
             {/* Botón Edit solo si el usuario es el creador */}
             {submission.created_by.username === loggedUser?.username && (
-              <Link
+              <><Text style={styles.separator}>|</Text><Link
                 style={styles.action}
                 key={submission.id}
                 href={`/editSubmission/${submission.id}?id=${submission.id}&loggedInUser=${loggedUser?.apiKey}`}
               >
                 Edit
-              </Link>
+              </Link></>
             )}
              
-             <Text style={styles.separator}>|</Text>
 
             {/* Botón Add to Favorites solo si el usuario no es el creador */}
             {submission.created_by.username !== loggedUser?.username && loggedUser?.username !== '' && (
-              <TouchableOpacity
+                <><Text style={styles.separator}>|</Text><TouchableOpacity
                 onPress={() => handleAddToFavorites(submission.id)}
               >
                 <Text style={styles.action}>Add to Favorites</Text>
-              </TouchableOpacity>
+              </TouchableOpacity></>
             )}
             
             <Text style={styles.separator}>|</Text>

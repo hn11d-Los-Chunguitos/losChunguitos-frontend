@@ -71,6 +71,7 @@ export default function TabLayout() {
       <Tabs.Screen name="replyComment/[comment]" options={{ href: null }}></Tabs.Screen>
       <Tabs.Screen name="editComment/[comment]" options={{ href: null }}></Tabs.Screen>
       <Tabs.Screen name="editSubmission/[submission]" options={{ href: null }}></Tabs.Screen>
+      <Tabs.Screen name="users/[user]" options={{ href: null }}></Tabs.Screen>  
     </Tabs>
   );
 }

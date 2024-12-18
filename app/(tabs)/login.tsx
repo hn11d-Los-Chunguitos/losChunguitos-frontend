@@ -9,8 +9,8 @@ export default function LoginScreen() {
   const { loggedUser, setUser } = useGlobalContext();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    banner: loggedUser?.banner || '',
-    avatar: loggedUser?.avatar || '',
+    banner: loggedUser?.banner || null,
+    avatar: loggedUser?.avatar || null,
     username: loggedUser?.username || '',
     about: loggedUser?.about || '',
   });
@@ -43,15 +43,26 @@ export default function LoginScreen() {
 
   const handleEdit = async () => {
     try {
+
+      // Combina los valores originales con los nuevos del formulario
+      const payload = {
+        banner: loggedUser?.banner,   // Mantiene el banner actual
+        avatar: loggedUser?.avatar,   // Mantiene el avatar actual
+        username: formData.username, // Toma el username del formulario
+        about: formData.about,       // Toma el about del formulario
+      };
+      console.log('Payload:', payload);
+  
       const response = await axios.patch(
         `https://proyecto-asw-render.onrender.com/api/users/${loggedUser?.id}/`,
-        formData,
-      { 
-        headers: {
-        Authorization: loggedUser?.apiKey,
-      }, } 
+        payload,
+        {
+          headers: {
+            Authorization: loggedUser?.apiKey, // Incluye el API key
+          },
+        }
       );
-
+  
       // Actualizar el contexto con los nuevos datos del usuario
       setUser({ ...loggedUser, ...response.data });
       setIsEditing(false); // Salir del modo de edición
@@ -60,6 +71,7 @@ export default function LoginScreen() {
       setIsEditing(false); // Salir del modo de edición
     }
   };
+  
 
   const handleChange = (field, value) => {
     setFormData((prevData) => ({ ...prevData, [field]: value }));
@@ -75,26 +87,14 @@ export default function LoginScreen() {
             <Text style={styles.title}>Editar Perfil</Text>
             <TextInput
               style={styles.input}
-              placeholder="URL del Banner"
-              value={formData.banner}
-              onChangeText={(text) => handleChange('banner', text)}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="URL del Avatar"
-              value={formData.avatar}
-              onChangeText={(text) => handleChange('avatar', text)}
-            />
-            <TextInput
-              style={styles.input}
               placeholder="Nombre de Usuario"
-              value={formData.username}
+              value={loggedUser?.username}
               onChangeText={(text) => handleChange('username', text)}
             />
             <TextInput
               style={styles.input}
               placeholder="Acerca de mí"
-              value={formData.about}
+              value={loggedUser?.about}
               onChangeText={(text) => handleChange('about', text)}
             />
             <View style={styles.buttonContainer}>
@@ -231,6 +231,14 @@ const styles = StyleSheet.create({
     color: '#ff6600', // Links en naranja
     fontSize: 12,
     marginBottom: 8,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 4,
+    padding: 8,
+    marginBottom: 8,
+    backgroundColor: '#f9f9f9',
   },
   
 });
