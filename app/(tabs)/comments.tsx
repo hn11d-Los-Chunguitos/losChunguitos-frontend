@@ -9,6 +9,7 @@ export default function CommentScreen() {
   const [comment, setComment] = useState([]); // Estado para guardar las submissions
   const [error, setError] = useState<string | null>(null); // Estado para errores
   const { loggedUser } = useGlobalContext(); // Accede al usuario logueado
+  const [message, setMessage] = useState<string | null>(null); // Estado para el mensaje
   
 
   const router = useRouter();
@@ -24,6 +25,7 @@ export default function CommentScreen() {
       .catch((err) => {
         setError('Error al cargar las comment');
         console.error(err);
+        setMessage('Error al cargar las comment');
         setComment([]);
       });
   }, []);
@@ -44,8 +46,10 @@ export default function CommentScreen() {
         }
       );
       console.log('Favorited correctly:', response.data);
+      setMessage('Comentario añadido a favoritos');
     } catch (err) {
       console.error('Error making favorite comment:', err);
+      setMessage('Error al añadir el comentario a favoritos');
       if (err.response) {
         console.log('Server response:', err.response.data);
       }
@@ -73,7 +77,7 @@ export default function CommentScreen() {
       if (response.status === 201) {
         console.log(response.data);
         console.log('Voto añadido correctamente.')
-        Alert.alert('Éxito', 'Voto registrado correctamente');
+        setMessage('Voto añadido correctamente');
     }
   } catch (err: any) {
     console.error('Error al votar:', err);
@@ -82,8 +86,10 @@ export default function CommentScreen() {
     if (err.response) {
       if (err.response.status === 400) {
         Alert.alert('Error', 'Ya has votado este comentario');
+        setMessage('Ya has votado este comentario');
       } else {
         Alert.alert('Error', 'No se pudo registrar el voto');
+        setMessage('No se pudo registrar el voto');
       }
     } else {
       Alert.alert('Error', 'No se pudo conectar al servidor');
@@ -96,6 +102,8 @@ export default function CommentScreen() {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Comments</Text>
       {error && <Text style={styles.error}>{error}</Text>}
+      {message && <Text style={styles.error}>{message}</Text>}
+      
       {comment.map((comment, index) => (
         <View key={index} style={styles.card}>
           <Text style={styles.cardTitle}>{comment.content}</Text>

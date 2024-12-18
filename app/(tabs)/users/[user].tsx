@@ -51,6 +51,12 @@ export default function UsersScreen() {
                   href={`/favoriteSubmissions?loggedInUser=Tcs5cIBgIysU9IswpHxPX-R21e0faN3fGmkdp4-EOlE`}>
                   Submissions Favoritas
                 </Link>
+                <Link 
+                  style={styles.action}
+                  href={`/favoriteComments?loggedInUser=Tcs5cIBgIysU9IswpHxPX-R21e0faN3fGmkdp4-EOlE`}>
+                  Comments Favoritos
+                </Link>
+
 
                 </View>
             </View>
@@ -110,9 +116,8 @@ const styles = StyleSheet.create({
     borderColor: "#ff6600",
   },
   buttonContainer: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     marginTop: 16,
-    paddingHorizontal: 16,
     gap: 8,
     justifyContent: 'flex-end',
   },

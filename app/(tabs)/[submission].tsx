@@ -75,7 +75,7 @@ export default function SubmissionDetailScreen() {
           {/* Contenido del comentario */}
           <Text style={styles.commentContent}>{comment.content}</Text>
           <Text style={styles.commentMeta}>
-            By User {comment.created_by?.username || 'Unknown'} • {formatDate(comment.created_at)}
+            By User id: {comment.created_by} • {formatDate(comment.created_at)}
           </Text>
   
           {/* Controles para votar o marcar como favorito */}
