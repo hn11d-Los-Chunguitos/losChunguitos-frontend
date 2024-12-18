@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from 'react'; 
 import axios from 'axios';
 import { useGlobalContext } from "@/contexts/GlobalContext";
-import { StyleSheet, View, Text, Button, Picker, Image, TextInput } from 'react-native';
+import { StyleSheet, View, Text, Button, Picker, Image, TextInput, ActivityIndicator } from 'react-native';
 import { Link, useLocalSearchParams } from 'expo-router';
 
 export default function UsersScreen() {
     const params = useLocalSearchParams();
-    const id = params.id as string | '1';
+    const id = params.id as string;
     const [profile, setProfile] = useState(null);
 
     const fetchUserProfile = async () => {
         try {
             const response = await axios.get(`https://proyecto-asw-render.onrender.com/api/users/${id}`);
+            console.log('User profile:', response.data);
             setProfile(response.data);
         } catch (error) {
             console.error("Error fetching user profile:", error);
@@ -19,16 +20,18 @@ export default function UsersScreen() {
     };
 
     useEffect(() => {
+        setProfile(null);
         fetchUserProfile();
-    }, []);
+    }, [id]);
 
     if (!profile) {
-        return (
-            <View style={styles.container}>
-                <Text>Loading...</Text>
-            </View>
-        );
-    }
+      return (
+          <View style={styles.container}>
+              <ActivityIndicator size="large" color="#ff6600" />
+          </View>
+      );
+  }
+  
 
     return (
         <View style={styles.container}>
