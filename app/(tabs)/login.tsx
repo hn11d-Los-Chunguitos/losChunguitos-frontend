@@ -107,8 +107,23 @@ export default function LoginScreen() {
             <Text style={styles.detail}>Karma: {loggedUser.karma}</Text>
             <Link 
               style={styles.action}
+              href={`/upvotedSubmissions?loggedInUser=${loggedUser?.apiKey}`}>
+              Submissions Votadas
+            </Link>
+            <Link 
+              style={styles.action}
+              href={`/upvotedComments?loggedInUser=${loggedUser?.apiKey}`}>
+              Comments Votados
+            </Link>
+            <Link 
+              style={styles.action}
               href={`/favoriteSubmissions?loggedInUser=${loggedUser?.apiKey}`}>
               Submissions Favoritas
+            </Link>
+            <Link 
+              style={styles.action}
+              href={`/favoriteComments?loggedInUser=${loggedUser?.apiKey}`}>
+              Comments Favoritos
             </Link>
             <Link 
               style={styles.action}

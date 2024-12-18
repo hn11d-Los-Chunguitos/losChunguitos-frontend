@@ -72,6 +72,9 @@ export default function TabLayout() {
       <Tabs.Screen name="editComment/[comment]" options={{ href: null }}></Tabs.Screen>
       <Tabs.Screen name="editSubmission/[submission]" options={{ href: null }}></Tabs.Screen>
       <Tabs.Screen name="users/[user]" options={{ href: null }}></Tabs.Screen>  
+      <Tabs.Screen name="upvotedSubmissions" options={{ href: null }}></Tabs.Screen>
+      <Tabs.Screen name="upvotedComments" options={{ href: null }}></Tabs.Screen>
+      <Tabs.Screen name="favoriteComments" options={{ href: null }}></Tabs.Screen>
     </Tabs>
   );
 }
