@@ -1,3 +1,8 @@
 [build]
-  command = "npx expo export"
-  publish = "web-build"
+  command = "npm run build"
+  publish = "dist" # Cambia a la carpeta que contiene tu build exportada
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
