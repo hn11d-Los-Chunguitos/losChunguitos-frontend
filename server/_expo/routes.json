@@ -1,0 +1,110 @@
+{
+  "apiRoutes": [],
+  "htmlRoutes": [
+    {
+      "file": "./(tabs)/index.tsx",
+      "page": "/(tabs)/index",
+      "namedRegex": "^(?:/\\(tabs\\))?(?:/)?$",
+      "routeKeys": {}
+    },
+    {
+      "file": "./(tabs)/ask.tsx",
+      "page": "/(tabs)/ask",
+      "namedRegex": "^(?:/\\(tabs\\))?/ask(?:/)?$",
+      "routeKeys": {}
+    },
+    {
+      "file": "./(tabs)/login.tsx",
+      "page": "/(tabs)/login",
+      "namedRegex": "^(?:/\\(tabs\\))?/login(?:/)?$",
+      "routeKeys": {}
+    },
+    {
+      "file": "./(tabs)/newest.tsx",
+      "page": "/(tabs)/newest",
+      "namedRegex": "^(?:/\\(tabs\\))?/newest(?:/)?$",
+      "routeKeys": {}
+    },
+    {
+      "file": "./(tabs)/comments.tsx",
+      "page": "/(tabs)/comments",
+      "namedRegex": "^(?:/\\(tabs\\))?/comments(?:/)?$",
+      "routeKeys": {}
+    },
+    {
+      "file": "expo-router/build/views/Sitemap.js",
+      "page": "/_sitemap",
+      "namedRegex": "^/_sitemap(?:/)?$",
+      "routeKeys": {},
+      "generated": true
+    },
+    {
+      "file": "./(tabs)/createSubmission.tsx",
+      "page": "/(tabs)/createSubmission",
+      "namedRegex": "^(?:/\\(tabs\\))?/createSubmission(?:/)?$",
+      "routeKeys": {}
+    },
+    {
+      "file": "./(tabs)/hiddenSubmissions.tsx",
+      "page": "/(tabs)/hiddenSubmissions",
+      "namedRegex": "^(?:/\\(tabs\\))?/hiddenSubmissions(?:/)?$",
+      "routeKeys": {}
+    },
+    {
+      "file": "./(tabs)/favoriteSubmissions.tsx",
+      "page": "/(tabs)/favoriteSubmissions",
+      "namedRegex": "^(?:/\\(tabs\\))?/favoriteSubmissions(?:/)?$",
+      "routeKeys": {}
+    },
+    {
+      "file": "./(tabs)/users/[user].tsx",
+      "page": "/(tabs)/users/[user]",
+      "namedRegex": "^(?:/\\(tabs\\))?/users/(?<user>[^/]+?)(?:/)?$",
+      "routeKeys": {
+        "user": "user"
+      }
+    },
+    {
+      "file": "./(tabs)/replyComment/[comment].tsx",
+      "page": "/(tabs)/replyComment/[comment]",
+      "namedRegex": "^(?:/\\(tabs\\))?/replyComment/(?<comment>[^/]+?)(?:/)?$",
+      "routeKeys": {
+        "comment": "comment"
+      }
+    },
+    {
+      "file": "./(tabs)/editSubmission/[submission].tsx",
+      "page": "/(tabs)/editSubmission/[submission]",
+      "namedRegex": "^(?:/\\(tabs\\))?/editSubmission/(?<submission>[^/]+?)(?:/)?$",
+      "routeKeys": {
+        "submission": "submission"
+      }
+    },
+    {
+      "file": "./(tabs)/editComment/[comment].tsx",
+      "page": "/(tabs)/editComment/[comment]",
+      "namedRegex": "^(?:/\\(tabs\\))?/editComment/(?<comment>[^/]+?)(?:/)?$",
+      "routeKeys": {
+        "comment": "comment"
+      }
+    },
+    {
+      "file": "./(tabs)/[submission].tsx",
+      "page": "/(tabs)/[submission]",
+      "namedRegex": "^(?:/\\(tabs\\))?/(?<submission>[^/]+?)(?:/)?$",
+      "routeKeys": {
+        "submission": "submission"
+      }
+    }
+  ],
+  "notFoundRoutes": [
+    {
+      "file": "./+not-found.tsx",
+      "page": "/+not-found",
+      "namedRegex": "^(?:/(?<notfound>.+?))?(?:/)?$",
+      "routeKeys": {
+        "notfound": "not-found"
+      }
+    }
+  ]
+}
