@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from 'react'; 
-import { StyleSheet, ScrollView, Text, View, TouchableOpacity, Linking } from 'react-native';
+import { StyleSheet, ScrollView, Text, View, TouchableOpacity, Alert } from 'react-native';
 import axios from 'axios';
 import { Link } from 'expo-router';
 import { useRouter } from 'expo-router';
+import { useGlobalContext } from "@/contexts/GlobalContext";
 
 export default function CommentScreen() {
   const [comment, setComment] = useState([]); // Estado para guardar las submissions
   const [error, setError] = useState<string | null>(null); // Estado para errores
+  const { loggedUser } = useGlobalContext(); // Accede al usuario logueado
+  
 
   const router = useRouter();
+  console.log(loggedUser?.username)
 
   useEffect(() => {
     axios
@@ -24,6 +28,69 @@ export default function CommentScreen() {
       });
   }, []);
 
+  const handleCommentFavorite = async (commentId: number) => {
+    if (!loggedUser) {
+      Alert.alert('Error', 'Debes iniciar sesión para votar');
+      return;
+    }
+    try {
+      const response = await axios.post(
+        `https://proyecto-asw-render.onrender.com/api/comments/${commentId}/addFav/`, 
+        {}, // El cuerpo vacío, si no necesitas enviar datos adicionales
+        {
+          headers: {
+            Authorization: loggedUser?.apiKey, 
+          },
+        }
+      );
+      console.log('Favorited correctly:', response.data);
+    } catch (err) {
+      console.error('Error making favorite comment:', err);
+      if (err.response) {
+        console.log('Server response:', err.response.data);
+      }
+    }
+  };
+
+  const handleVoteComment = async(commentId: number) => {
+    if (!loggedUser) {
+      Alert.alert('Error', 'Debes iniciar sesión para votar');
+      return;
+    }
+    try {
+      const response = await axios.post(
+        `https://proyecto-asw-render.onrender.com/api/comments/${commentId}/vote/`,
+        { 
+          comment: commentId 
+        },
+        {
+          headers: {
+            Authorization: loggedUser?.apiKey,
+          },
+        }
+      );
+
+      if (response.status === 201) {
+        console.log(response.data);
+        console.log('Voto añadido correctamente.')
+        Alert.alert('Éxito', 'Voto registrado correctamente');
+    }
+  } catch (err: any) {
+    console.error('Error al votar:', err);
+    
+    // Manejar diferentes tipos de errores
+    if (err.response) {
+      if (err.response.status === 400) {
+        Alert.alert('Error', 'Ya has votado este comentario');
+      } else {
+        Alert.alert('Error', 'No se pudo registrar el voto');
+      }
+    } else {
+      Alert.alert('Error', 'No se pudo conectar al servidor');
+    }
+    }
+  };
+
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -37,14 +104,42 @@ export default function CommentScreen() {
               {comment.created_by.username} {'at '}
               {new Date(comment.created_at).toLocaleDateString()}
             </Text>
+            <Text style={styles.voteCount}>{comment.total_votes} votos</Text>
             <Text style={styles.separator}>|</Text>
             <Link 
             style={styles.link}
             key={comment.id} 
             href={`/replyComment/${comment.id}?id=${comment.id}`}
           >
-            Discuss
+            Reply
           </Link>
+          <Text style={styles.separator}>|</Text>
+          {comment.created_by.username === loggedUser?.username && (
+            <Link 
+              style={styles.link}
+              key={comment.id} 
+              href={`/editComment/${comment.id}?id=${comment.id}&loggedInUser=${loggedUser?.apiKey}&submission=${comment.submission}&userId=${comment.created_by}`}
+            >
+              Edit
+            </Link>
+          )}
+          {comment.created_by.username !== loggedUser?.username && loggedUser?.username !== '' && (
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                onPress={() => handleVoteComment(comment.id)}
+              >
+                <Text style={styles.action}>Vote</Text>
+              </TouchableOpacity>
+
+              <Text style={styles.separator}>|</Text>
+
+              <TouchableOpacity
+                onPress={() => handleCommentFavorite(comment.id)}
+              >
+                <Text style={styles.action}>Favorite</Text>
+              </TouchableOpacity>
+            </View>
+          )}
           </View>
         </View>
       ))}
@@ -118,6 +213,19 @@ export default function CommentScreen() {
     separator: {
       marginHorizontal: 3,
       color: '#eeeeee', // Same color as cardMeta for consistency
+    },
+    action: {
+      color: '#ff6600', // Links en naranja
+      fontSize: 12,
+    },
+    buttonRow: {
+      flexDirection: 'row', // Organiza los botones horizontalmente
+      alignItems: 'center', // Alinea verticalmente los botones
+      marginTop: 8,
+    },
+    voteCount: {
+      fontSize: 12,
+      color: '#828282',
     },
   });
 

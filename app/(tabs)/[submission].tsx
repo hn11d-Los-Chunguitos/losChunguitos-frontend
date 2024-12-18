@@ -75,7 +75,7 @@ export default function SubmissionDetailScreen() {
       <View key={comment.id} style={[styles.comment, { marginLeft: depth * 16 }]}>
         <Text style={styles.commentContent}>{comment.content}</Text>
         <Text style={styles.commentMeta}>
-          By User {userId} • {formatDate(comment.created_at)}
+          By User {comment.created_by} • {formatDate(comment.created_at)}
         </Text>
         <View style={styles.commentVoteContainer}>
           <TouchableOpacity 
