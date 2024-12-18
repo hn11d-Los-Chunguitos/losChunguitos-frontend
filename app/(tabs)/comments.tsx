@@ -41,7 +41,7 @@ export default function CommentScreen() {
             <Link 
             style={styles.link}
             key={comment.id} 
-            href={`/${comment.id}?id=${comment.id}`}
+            href={`/replyComment/${comment.id}?id=${comment.id}`}
           >
             Discuss
           </Link>
